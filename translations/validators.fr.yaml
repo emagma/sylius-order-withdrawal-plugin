@@ -1,0 +1,6 @@
+emagma_sylius_order_withdrawal:
+    form:
+        legal_notice_required: 'Vous devez accepter la mention de rétractation pour continuer.'
+        partial_detail_required: 'Merci de préciser les articles concernés par votre rétractation partielle.'
+        order_date_not_in_future: 'La date de commande ne peut pas être dans le futur.'
+        reception_date_not_in_future: 'La date de réception ne peut pas être dans le futur.'

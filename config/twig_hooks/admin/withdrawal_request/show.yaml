@@ -1,0 +1,14 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.withdrawal_request.show.content':
+            page_body:
+                template: '@EmagmaSyliusOrderWithdrawalPlugin/admin/withdrawal_request/show/content.html.twig'
+                priority: 0
+
+        'sylius_admin.withdrawal_request.show.content.header':
+            breadcrumbs:
+                template: '@SyliusAdmin/shared/crud/show/content/header/breadcrumbs.html.twig'
+                configuration:
+                    rendered_field_prefix: '#'
+                    rendered_field: orderNumber
+                priority: 0

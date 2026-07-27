@@ -1,0 +1,9 @@
+emagma_sylius_order_withdrawal_admin:
+    resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/routes/admin.yaml'
+    prefix: '/%sylius_admin.path_name%'
+
+emagma_sylius_order_withdrawal_shop:
+    resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/routes/shop.yaml'
+    prefix: /{_locale}
+    requirements:
+        _locale: ^[a-z]{2}(?:_[A-Z]{2})?$

@@ -1,0 +1,4 @@
+emagma_sylius_order_withdrawal:
+    withdrawal_request:
+        create: 'Your withdrawal request has been sent. You will receive an acknowledgement by email.'
+        transition_applied: 'The withdrawal request status has been updated.'

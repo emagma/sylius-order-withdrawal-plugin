@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping
+                    https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
+
+    <class name="Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest">
+        <property name="firstName">
+            <constraint name="NotBlank">
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="lastName">
+            <constraint name="NotBlank">
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="orderNumber">
+            <constraint name="NotBlank">
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="orderDate">
+            <constraint name="NotBlank">
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+            <constraint name="LessThanOrEqual">
+                <option name="value">today</option>
+                <option name="message">emagma_sylius_order_withdrawal.form.order_date_not_in_future</option>
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="receptionDate">
+            <constraint name="LessThanOrEqual">
+                <option name="value">today</option>
+                <option name="message">emagma_sylius_order_withdrawal.form.reception_date_not_in_future</option>
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="email">
+            <constraint name="NotBlank">
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+            <constraint name="Email">
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="message">
+            <constraint name="Expression">
+                <option name="expression">this.getScope().value != "partial" or (value != null and value != "")</option>
+                <option name="message">emagma_sylius_order_withdrawal.form.partial_detail_required</option>
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="legalNoticeAccepted">
+            <constraint name="IsTrue">
+                <option name="message">emagma_sylius_order_withdrawal.form.legal_notice_required</option>
+                <option name="groups">
+                    <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+    </class>
+
+</constraint-mapping>

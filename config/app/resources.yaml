@@ -1,0 +1,5 @@
+sylius_resource:
+    resources:
+        emagma_sylius_order_withdrawal.withdrawal_request:
+            classes:
+                model: Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest

@@ -1,0 +1,34 @@
+imports:
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/config.yaml' }
+
+twig:
+    paths:
+        '%kernel.project_dir%/../../../tests/TestApplication/templates': ~
+
+# Sylius registers its Behat context services only in `services_test.php`, which the
+# shared test-application kernel never loads (its MicroKernelTrait takes the YAML
+# branch and looks for `services_test.yaml`). Import them here, in `test` only, so
+# `behat` can resolve the core Sylius contexts referenced by the imported core
+# suites.yml. Path is relative to this file (<plugin>/tests/TestApplication/config/).
+when@test:
+    imports:
+        - { resource: '../../../vendor/sylius/sylius/src/Sylius/Behat/Resources/config/services.xml' }
+        - { resource: '../../Behat/Resources/config/services.xml' }
+
+    emagma_sylius_order_withdrawal:
+        notification_email: 'sav@example.com'
+
+    # The dev stack's test vhost forces APP_DEBUG=0 (see .docker/Caddyfile), while the Behat
+    # CLI process inherits the container's default APP_DEBUG=1 — two different debug flags for
+    # the same "test" environment. Symfony's cache-pool namespace defaults to a seed built from
+    # `kernel.container_class`, which differs between a debug and non-debug container. Without
+    # pinning this, `test.mailer_pool` (used by sylius.behat.context.hook.mailer /
+    # EmailChecker) resolves to two different filesystem-cache directories depending on which
+    # process wrote/read it — so a `@javascript` scenario's HTTP request (handled by the
+    # debug=0 webserver) caches its sent email in a directory the debug=1 Behat CLI process
+    # never looks in, and `hasMessageTo()` always reports "no email sent" even though one was.
+    # Pinning prefix_seed makes both processes agree on the same cache directory regardless of
+    # which debug flag compiled their container.
+    framework:
+        cache:
+            prefix_seed: 'emagma_sylius_order_withdrawal_behat_test'

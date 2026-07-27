@@ -1,0 +1,22 @@
+# Build context trimming for the feature-test image (docker/feature-test/Dockerfile),
+# whose build context is the repo root. The local dev stack (.docker/) has its own build
+# with a .docker/ context, so it is unaffected by this file.
+.git
+.idea
+.claude
+.playwright-mcp
+# The local-only dev stack is not needed in the feature-test image.
+.docker
+docs
+spec
+var/cache
+var/log
+var/sessions
+# Resolved fresh inside the image (per Symfony line), so keep the host copy out.
+vendor
+composer.lock
+# JS deps are installed/built inside the image.
+node_modules
+**/node_modules
+*.sqlite
+.phpunit.result.cache

@@ -1,0 +1,32 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% form_theme form '@SyliusShop/form/theme.html.twig' %}
+
+{% block content %}
+    <div class="container my-5">
+        <section aria-labelledby="emagma-withdrawal-heading">
+            <h1 id="emagma-withdrawal-heading" class="h2">
+                {{ 'emagma_sylius_order_withdrawal.shop.title'|trans }}
+            </h1>
+            <p class="text-muted">{{ 'emagma_sylius_order_withdrawal.shop.intro'|trans }}</p>
+
+            <div class="card">
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        {# Extension point for jurisdiction-specific legal notices (e.g. statutory withdrawal exclusions). Empty by default. #}
+                        {% block sector_conditions %}{% endblock %}
+
+                        {{ form_widget(form) }}
+
+                        <p id="emagma-withdrawal-submit-note" class="form-text">{{ 'emagma_sylius_order_withdrawal.shop.submit_notice'|trans }}</p>
+                        <button type="submit" id="emagma-order-withdrawal-submit"
+                                class="btn btn-primary w-100"
+                                aria-describedby="emagma-withdrawal-submit-note">
+                            {{ 'emagma_sylius_order_withdrawal.shop.cta'|trans }}
+                        </button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,25 @@
+framework:
+    workflows:
+        emagma_sylius_order_withdrawal_request:
+            type: state_machine
+            marking_store:
+                type: method
+                property: state
+            supports:
+                - Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest
+            initial_marking: new
+            places:
+                - new
+                - in_progress
+                - confirmed
+                - rejected
+            transitions:
+                start:
+                    from: new
+                    to: in_progress
+                confirm:
+                    from: [new, in_progress]
+                    to: confirmed
+                reject:
+                    from: [new, in_progress]
+                    to: rejected

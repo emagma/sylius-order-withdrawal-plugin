@@ -1,0 +1,6 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.base.footer.content':
+            emagma_withdrawal_request:
+                template: '@EmagmaSyliusOrderWithdrawalPlugin/shop/footer/_withdrawal_request.html.twig'
+                priority: 150

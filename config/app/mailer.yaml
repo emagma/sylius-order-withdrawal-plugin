@@ -1,0 +1,8 @@
+sylius_mailer:
+    emails:
+        emagma_withdrawal_request_acknowledgement:
+            template: '@EmagmaSyliusOrderWithdrawalPlugin/email/acknowledgement.html.twig'
+        emagma_withdrawal_request_notification:
+            template: '@EmagmaSyliusOrderWithdrawalPlugin/email/notification.html.twig'
+        emagma_withdrawal_request_confirmation:
+            template: '@EmagmaSyliusOrderWithdrawalPlugin/email/confirmation.html.twig'

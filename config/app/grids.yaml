@@ -1,0 +1,62 @@
+sylius_grid:
+    grids:
+        emagma_sylius_order_withdrawal_withdrawal_request:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: '%emagma_sylius_order_withdrawal.model.withdrawal_request.class%'
+            sorting:
+                submittedAt: desc
+            fields:
+                submittedAt:
+                    type: datetime
+                    label: emagma_sylius_order_withdrawal.form.submitted_at
+                    options:
+                        format: d-m-Y H:i:s
+                lastName:
+                    type: string
+                    label: emagma_sylius_order_withdrawal.form.last_name
+                firstName:
+                    type: string
+                    label: emagma_sylius_order_withdrawal.form.first_name
+                orderNumber:
+                    type: string
+                    label: emagma_sylius_order_withdrawal.form.order_number
+                channel:
+                    type: string
+                    label: sylius.ui.channel
+                    path: channel.name
+                scope:
+                    type: twig
+                    label: emagma_sylius_order_withdrawal.form.scope
+                    options:
+                        template: '@EmagmaSyliusOrderWithdrawalPlugin/admin/withdrawal_request/grid/field/scope.html.twig'
+                state:
+                    type: twig
+                    label: emagma_sylius_order_withdrawal.form.state
+                    options:
+                        template: '@EmagmaSyliusOrderWithdrawalPlugin/admin/withdrawal_request/grid/field/state.html.twig'
+            filters:
+                lastName:
+                    type: string
+                orderNumber:
+                    type: string
+                state:
+                    type: select
+                    form_options:
+                        choices:
+                            emagma_sylius_order_withdrawal.state.new: new
+                            emagma_sylius_order_withdrawal.state.in_progress: in_progress
+                            emagma_sylius_order_withdrawal.state.confirmed: confirmed
+                            emagma_sylius_order_withdrawal.state.rejected: rejected
+                channel:
+                    type: entity
+                    form_options:
+                        class: '%sylius.model.channel.class%'
+                        choice_label: name
+                submittedAt:
+                    type: date
+            actions:
+                item:
+                    show:
+                        type: show
