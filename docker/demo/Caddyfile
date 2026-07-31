@@ -1,4 +1,4 @@
-# Plain-HTTP single-port server for the feature-test image. No TLS, no auto-https:
+# Plain-HTTP single-port server for the demo image. No TLS, no auto-https:
 # the image is reached at http://localhost:<published-port>, so certificates would
 # only get in the way (and the host:port rarely matches any channel hostname anyway).
 {

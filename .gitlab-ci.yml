@@ -1,4 +1,4 @@
-# Builds and pushes the self-contained feature-test image (docker/feature-test/) to the
+# Builds and pushes the self-contained demo image (docker/demo/) to the
 # project registry, one image per supported Symfony line on Sylius 2.0 (core itself requires
 # ^6.4.1 || ^7.1).
 #
@@ -10,7 +10,7 @@
 stages:
   - build
 
-build-feature-test-image:
+build-demo-image:
   stage: build
   image: docker:27
   services:
@@ -31,7 +31,7 @@ build-feature-test-image:
     - docker pull "$TAG" || true
     - >
       docker build
-      --file docker/feature-test/Dockerfile
+      --file docker/demo/Dockerfile
       --build-arg SYMFONY_VERSION="${SYMFONY_VERSION}"
       --cache-from "$TAG"
       --tag "$TAG"

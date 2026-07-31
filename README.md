@@ -1,8 +1,80 @@
-<h1 align="center">Emagma SyliusOrderWithdrawal Plugin</h1>
+<h1 align="center">
+    <img src="EmagmaOrderWithdrawalPlugin.svg" alt="" width="96" height="96"><br>
+    Sylius Order Withdrawal Plugin
+</h1>
 
-<p align="center">Order withdrawal management for Sylius</p>
+<p align="center">
+    A public withdrawal form for your Sylius shop — customers notify you that they are exercising
+    their right of withdrawal, and you triage the requests from the admin panel.
+</p>
 
-## Installation
+<p align="center">
+    <!-- TODO(release): add the Build badge once the GitHub Actions workflow exists. -->
+    <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/v/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist version"></a>
+    <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/dt/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist downloads"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+</p>
+
+## Demo
+
+<!-- TODO(media): drop the recorded assets in docs/media/ — see docs/media/README.md for the shot list. -->
+![A customer submits a withdrawal request, and an administrator confirms it](docs/media/demo.gif)
+
+| Shop form | Admin list | Admin detail |
+| --- | --- | --- |
+| ![The withdrawal form on the storefront](docs/media/shop-form.png) | ![The withdrawal requests grid in the admin panel](docs/media/admin-grid.png) | ![A single request with its available transitions](docs/media/admin-show.png) |
+
+Everything above runs locally in two commands — see [Try it in one command](#try-it-in-one-command).
+
+## What it does
+
+Under EU consumer law ([Directive 2011/83/EU](https://eur-lex.europa.eu/eli/dir/2011/83/oj)), a
+customer buying online has **14 days to withdraw** from the purchase. The shop must give them a way
+to say so, and acknowledge it on a durable medium. This plugin is that mechanism.
+
+- **A public form** at `/{locale}/withdrawal-request`, linked from the shop footer. No account, no
+  login.
+- **Full or partial** withdrawal, with a mandatory detail field when it is partial.
+- **An acknowledgement email** to the customer, timestamped, sent on submission.
+- **A notification email** to the shop, routed to the channel's contact email by default.
+- **An admin screen** — a filterable grid, plus a detail page with three actions: take in charge,
+  confirm, reject. Confirming emails the customer.
+- **Channel- and locale-aware** — each request records where and in which language it came from.
+- **Extensible** — a Symfony state machine, a domain event, a notifier interface, and overridable
+  templates and emails.
+
+### What it does *not* do
+
+Being explicit here will save you an evaluation:
+
+- It **does not link a request to a real Sylius order.** `orderNumber` is free text, typed by the
+  customer. Nothing is checked against `sylius_order`.
+- It **does not verify** that the order exists, that it belongs to the person submitting, or that
+  the request falls inside the withdrawal window.
+- It **does not refund, cancel or restock** anything, and it never touches the order state machine.
+
+It is a **notification and triage tool**. The commercial and accounting side of a withdrawal stays
+in your existing process; the plugin makes sure the request reaches you, is acknowledged in
+writing, and does not get lost.
+
+> **Not legal advice.** Installing this plugin does not make your shop compliant with any
+> particular jurisdiction. The shipped wording is a starting point — have your own counsel review
+> the legal notice, the form copy and your terms before going live.
+
+## Requirements
+
+| | Version |
+| --- | --- |
+| PHP | `^8.2` |
+| Sylius | `^2.0` |
+| Symfony | `6.4` or `7.x` |
+| Database | MySQL / MariaDB (the shipped migration is MySQL-specific) |
+
+No front-end build is required: the plugin ships no JavaScript and no compiled assets.
+
+> The **`1.14`** branch targets Sylius `^1.14`. See [Branching](CONTRIBUTING.md#branching).
+
+## Install
 
 ```bash
 composer require emagma/sylius-order-withdrawal-plugin
@@ -17,92 +89,111 @@ return [
 ];
 ```
 
-## Front-end assets
+Import the configuration and the routes:
 
-This plugin ships its front-end code under `assets/{admin,shop}/entrypoint.js`. Composer
-installs the PHP code but **does not build JavaScript** — your application's own Webpack
-Encore build must compile the plugin's entrypoints, and any npm packages they import must be
-installed in **your** app (Composer manages PHP, not npm — there is no automatic propagation).
-
-In your Sylius application:
-
-1. **Install the npm dependencies this plugin imports** (none required by default — add any
-   your customisations introduce), e.g.:
-
-   ```bash
-   yarn add swiper
-   ```
-
-2. **Register the plugin's entrypoints in your `webpack.config.js`**, pointing at the
-   installed package under `vendor/`:
-
-   ```js
-   Encore
-       // ... your existing admin config
-       .addEntry('emagma-sylius-order-withdrawal-admin', './vendor/emagma/sylius-order-withdrawal-plugin/assets/admin/entrypoint.js');
-
-   Encore
-       // ... your existing shop config
-       .addEntry('emagma-sylius-order-withdrawal-shop', './vendor/emagma/sylius-order-withdrawal-plugin/assets/shop/entrypoint.js');
-   ```
-
-3. **Include the built entries** in your admin/shop layout (or via a Twig hook on Sylius 2.x):
-
-   ```twig
-   {{ encore_entry_script_tags('emagma-sylius-order-withdrawal-admin') }}
-   ```
-
-4. Rebuild: `yarn install && yarn encore dev` (or `production`).
-
-> For the plugin's **own** development/CI build, dependencies are declared in
-> `tests/TestApplication/package.json` instead (the bundled `sylius/test-application` merges
-> and builds them automatically) — see the `dev` skill. That file is for this repo's build
-> only; it does **not** reach consumers, so keep this section in sync with it.
-
-## Development
-
-This plugin uses the shared [`sylius/test-application`](https://github.com/Sylius/TestApplication)
-as its test environment — there is no bundled test application.
-
-```bash
-composer install
-vendor/bin/ecs check          # coding standard
-vendor/bin/phpstan analyse    # static analysis
-vendor/bin/phpunit            # unit tests
-vendor/bin/phpspec run        # specs
-vendor/bin/behat              # acceptance tests (all suites — Sylius core suites need a DB/browser)
+```yaml
+# config/packages/emagma_sylius_order_withdrawal.yaml
+imports:
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/config.yaml' }
 ```
 
-A ready-to-run example acceptance scenario ships in `features/plugin_test_harness.feature`
-(context: `tests/Behat/Context/SmokeContext.php`). It needs no database or browser — run
-just that suite to confirm the Behat harness works and to see the pattern:
-
-```bash
-vendor/bin/behat --suite=sylius_order_withdrawal_smoke
+```yaml
+# config/routes/emagma_sylius_order_withdrawal.yaml
+emagma_sylius_order_withdrawal:
+    resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/routes.yaml'
 ```
 
-## Development with Docker (local)
-
-The dev Docker stack (FrankenPHP + yarn + Mailpit + MariaDB) is **not committed** —
-regenerate it in this directory with `emagma:scaffold-sylius-plugin` (it detects the
-existing plugin and adds only `.docker/`), then:
+Then create the table:
 
 ```bash
-docker compose -f .docker/compose.yaml up -d --build
+bin/console doctrine:migrations:migrate -n
+bin/console cache:clear
 ```
 
-- App: `https://plugin.sylius.wip` · Test env: `https://test.plugin.sylius.wip` · Mailpit: `https://mail.plugin.sylius.wip`
-- Local `.wip` domains are mapped by the `docker-etc-hosts` sidecar (no published ports);
-  it pulls from `registry.gitlab.com`, so `docker login registry.gitlab.com` first.
+**Check it's up:** the shop footer shows a *Withdrawal request* link, and the admin menu shows
+*Withdrawal requests* under **Customers**.
 
-## Branching
+Full walk-through, verification steps and troubleshooting:
+**[docs/usage/getting-started.md](docs/usage/getting-started.md)**.
 
-This repository follows the official Sylius compatibility-branch model:
+## Try it in one command
 
-- `main` — newest supported Sylius line.
-- `X.Y` branches (e.g. `1.14`, `2.0`) — one per supported Sylius line, differing
-  only in the `sylius/sylius` and `sylius/test-application` constraints.
+A self-contained Docker image boots a Sylius shop with this plugin mounted, sample fixtures loaded,
+and Mailpit capturing every outgoing email. No database, PHP or Node needed on your machine.
+
+It builds from **this repository**, so clone it first — the image is for evaluating and developing
+the plugin, not something you run from inside your own project:
+
+```bash
+git clone https://github.com/emagma/sylius-order-withdrawal-plugin.git
+cd sylius-order-withdrawal-plugin
+docker build -f docker/demo/Dockerfile --build-arg SYMFONY_VERSION="6.4.*" -t owp-demo .
+docker run --rm -p 8080:80 -p 8025:8025 owp-demo
+```
+
+- Shop form → <http://localhost:8080/en_US/withdrawal-request>
+- Admin → <http://localhost:8080/admin> (`sylius` / `sylius`)
+- Emails → <http://localhost:8025>
+
+Details in **[docker/demo/README.md](docker/demo/README.md)**.
+
+## Documentation
+
+**Using the plugin**
+
+- [Getting started](docs/usage/getting-started.md) — install, verify, first request
+- [The customer journey](docs/usage/customer-journey.md) — the form, field by field, and its validation rules
+- [Admin guide](docs/usage/admin-guide.md) — the grid, the filters, the state machine
+- [Emails](docs/usage/emails.md) — the three emails, who receives them, how to change them
+- [Configuration reference](docs/usage/configuration.md) — every option and its default
+
+**Extending the plugin**
+
+- [Architecture](docs/dev/architecture.md) — what a request touches, and in what order
+- [Extending](docs/dev/extending.md) — the entity, form, state machine, notifiers, events and templates
+- [Translating](docs/dev/translating.md) — add a locale, override a single label
+- [Testing](docs/dev/testing.md) — PHPUnit, the four Behat suites, static analysis
+- [Demo image](docker/demo/README.md) — the Docker demo, for evaluation or screenshots
+
+[Changelog](CHANGELOG.md) · [Upgrade guide](UPGRADE.md) · [Contributing](CONTRIBUTING.md)
+
+## Translating
+
+The plugin ships **English** and **French** for messages, validation errors and flash messages.
+
+Adding a locale is one file per domain in your application's `translations/`, with no code involved
+— see [docs/dev/translating.md](docs/dev/translating.md). Translation contributions are very
+welcome; open a pull request with the new files.
+
+## Contributing
+
+Issues and pull requests are welcome. Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** first — it
+covers which branch to target (there is one per Sylius line), the quality gate your PR has to pass,
+and how to run the test suites locally.
+
+GitHub issues are for **bugs and feature requests only**, not for support — see below.
+
+## Support
+
+Emagma open-sources this plugin **as is**, under the MIT license. There is no warranty, and no
+implied obligation to respond, fix or maintain.
+
+| I want to… | Go to |
+| --- | --- |
+| Report a bug or request a feature | [GitHub issues](../../issues), with a reproduction |
+| Ask the community for help | [Sylius Slack](https://sylius.com/slack) |
+| Get professional, paid support | <support@emagma.fr> — French native, English best effort |
+| Report a security vulnerability | <security@emagma.fr> — privately, never a public issue ([policy](SECURITY.md)) |
+
+Please do **not** open GitHub issues for installation help, integration questions or "how do I…?"
+— they will be closed and redirected.
+
+## Credits
+
+Built and maintained by [Emagma](https://emagma.fr).
 
 ## License
 
-This plugin is released under the MIT license.
+Released under the [MIT license](LICENSE). Sylius, the Sylius logo and the Sylius name are
+trademarks of Sylius Sp. z o.o. — see
+[LICENSE_OF_TRADEMARK_AND_LOGO](LICENSE_OF_TRADEMARK_AND_LOGO).

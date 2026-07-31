@@ -1,4 +1,4 @@
-# Feature-test image
+# Demo image
 
 A single, self-contained image that boots the Sylius test application with **this plugin
 mounted**, so anyone can exercise the withdrawal feature end to end without the full dev
@@ -24,16 +24,16 @@ Tag scheme is `<branch>-sf<major>`:
 IMAGE=registry.gitlab.com/emagma/sylius-plugins/order-withdrawal-plugin
 
 # Symfony 6.4 · Sylius 2.0
-docker build -f docker/feature-test/Dockerfile \
+docker build -f docker/demo/Dockerfile \
   --build-arg SYMFONY_VERSION="6.4.*" -t "$IMAGE:2.0-sf6" .
 
 # Symfony 7.1 · Sylius 2.0
-docker build -f docker/feature-test/Dockerfile \
+docker build -f docker/demo/Dockerfile \
   --build-arg SYMFONY_VERSION="7.1.*" -t "$IMAGE:2.0-sf7" .
 ```
 
 CI builds and pushes both variants automatically — see `.gitlab-ci.yml` at the repo root (the
-`build-feature-test-image` matrix job).
+`build-demo-image` matrix job).
 
 ## Push / pull
 
@@ -44,7 +44,7 @@ docker push registry.gitlab.com/emagma/sylius-plugins/order-withdrawal-plugin:2.
 docker pull registry.gitlab.com/emagma/sylius-plugins/order-withdrawal-plugin:2.0-sf6
 ```
 
-## Run — manual feature testing
+## Run — try the demo
 
 ```bash
 docker run --rm -p 8080:80 -p 8025:8025 \

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Feature-test image entrypoint.
+# Demo image entrypoint.
 #
 # Default (no args): start Mailpit (SMTP sink + web UI) in the background, then run the
 # FrankenPHP web server in the foreground — a single self-contained shop you can click

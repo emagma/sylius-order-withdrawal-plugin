@@ -1,0 +1,56 @@
+name: ✨ Feature request
+description: Suggest something the plugin should do.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. Two things worth knowing before you write it up:
+
+        - The plugin is intentionally a **notification and triage tool**. It does not link requests
+          to real orders, verify them, or issue refunds — see
+          [what it does not do](../../blob/main/README.md#what-it-does-not-do). Proposals that turn
+          it into a returns engine are likely out of scope.
+        - Many things are already extensible from your own application without a plugin change —
+          check [extending.md](../../blob/main/docs/dev/extending.md) first.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >-
+        What are you actually trying to accomplish, and what makes it hard today? Describe the
+        situation, not the solution — it often turns out there is already a way.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd like
+      description: The change you have in mind, and roughly how you imagine it working.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried
+      description: >-
+        Which extension points you looked at (an event listener, a notifier, a template override, a
+        redefined workflow) and why they didn't cover it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Would you be willing to implement it?
+      description: Not a commitment, and not a condition — it just helps with planning.
+      options:
+        - "Yes, with guidance on the approach"
+        - "Yes, I have a working patch already"
+        - "No, but I can test a pull request"
+        - "No"
+    validations:
+      required: true

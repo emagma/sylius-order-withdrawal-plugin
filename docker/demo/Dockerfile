@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Self-contained feature-test image for the Emagma Sylius Order Withdrawal plugin.
+# Self-contained demo image for the Emagma Sylius Order Withdrawal plugin.
 #
 #   FrankenPHP (serves the Sylius test application that mounts this plugin)
 #   + Mailpit   (captures every outgoing email — web UI on :8025)
@@ -15,10 +15,10 @@
 #
 # Image name = project registry; tag = "<branch>-sf<major>", e.g. 2.0-sf6 / 2.0-sf7:
 #   IMAGE=registry.gitlab.com/emagma/sylius-plugins/order-withdrawal-plugin
-#   docker build -f docker/feature-test/Dockerfile \
+#   docker build -f docker/demo/Dockerfile \
 #     --build-arg SYMFONY_VERSION="6.4.*" -t "$IMAGE:2.0-sf6" .
 #
-# Run (manual feature testing):
+# Run (try the demo):
 #   docker run --rm -p 8080:80 -p 8025:8025 "$IMAGE:2.0-sf6"
 #   → shop at http://localhost:8080  ·  Mailpit at http://localhost:8025
 #
@@ -56,7 +56,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip \
     && rm -rf /var/lib/apt/lists/*
 
-COPY docker/feature-test/php.ini ${PHP_INI_DIR}/conf.d/zz-feature-test.ini
+COPY docker/demo/php.ini ${PHP_INI_DIR}/conf.d/zz-demo.ini
 
 # Served kernel configuration: the test-application kernel reads these to mount THIS plugin
 # (paths resolve against the plugin root, i.e. /app). Mirrors the dev stack's env.
@@ -93,8 +93,8 @@ RUN set -eux; \
     composer clear-cache; \
     rm -rf "$APP/node_modules" /root/.cache/yarn
 
-COPY docker/feature-test/Caddyfile /etc/caddy/Caddyfile
-COPY docker/feature-test/entrypoint.sh /usr/local/bin/entrypoint
+COPY docker/demo/Caddyfile /etc/caddy/Caddyfile
+COPY docker/demo/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
 EXPOSE 80 8025
