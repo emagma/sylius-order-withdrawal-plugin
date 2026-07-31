@@ -13,8 +13,8 @@ Email <security@emagma.fr> with:
 You will get an acknowledgement, and we will work with you on a fix and a disclosure timeline
 before anything is made public. Please give us a reasonable window to release before disclosing.
 
-Emagma open-sources this plugin as is and does not offer a bug bounty. Reports are still very much
-appreciated, and reporters are credited in the changelog unless they prefer otherwise.
+We don't run a bug bounty, but reports are genuinely appreciated and we take them seriously.
+Reporters are credited in the changelog unless they prefer otherwise.
 
 ## Supported versions
 

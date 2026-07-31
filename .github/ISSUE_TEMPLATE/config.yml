@@ -3,14 +3,14 @@ contact_links:
   - name: 💬 Community support
     url: https://sylius.com/slack
     about: >-
-      Installation help, integration questions and "how do I…?" belong on the Sylius Slack.
-      Support issues opened here are closed and redirected.
+      Installation help, integration questions and "how do I…?" — the whole Sylius community
+      is on Slack, so you'll usually get an answer faster there than in an issue here.
   # NOTE: `url` must start with http(s) — GitHub rejects `mailto:` with a schema error, and a
   # rejected config.yml silently disables ALL of this file, including blank_issues_enabled.
-  - name: 🛟 Professional support
+  - name: 🛟 Pro support
     url: https://github.com/emagma/sylius-order-withdrawal-plugin#support
     about: >-
-      Paid support, custom development and integration work from Emagma —
+      Pro support, custom development and integration work from Emagma —
       support@emagma.fr. French native, English best effort.
   - name: 📖 Documentation
     url: https://github.com/emagma/sylius-order-withdrawal-plugin/tree/main/docs

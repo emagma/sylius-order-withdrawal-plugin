@@ -1,5 +1,12 @@
+<p align="center">
+    <!-- TODO(release): add the Build badge once the GitHub Actions workflow exists. -->
+    <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/v/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist version"></a>
+    <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/dt/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist downloads"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+</p>
+
 <h1 align="center">
-    <img src="EmagmaOrderWithdrawalPlugin.svg" alt="" width="96" height="96"><br>
+    <img src="etc/emagma/EmagmaOrderWithdrawalPlugin.svg" alt="" width="96" height="96"><br>
     Sylius Order Withdrawal Plugin
 </h1>
 
@@ -8,11 +15,44 @@
     their right of withdrawal, and you triage the requests from the admin panel.
 </p>
 
-<p align="center">
-    <!-- TODO(release): add the Build badge once the GitHub Actions workflow exists. -->
-    <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/v/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist version"></a>
-    <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/dt/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist downloads"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+
+## License
+
+Released under the [MIT license](LICENSE). Sylius, the Sylius logo and the Sylius name are
+trademarks of Sylius Sp. z o.o. — see
+[LICENSE_OF_TRADEMARK_AND_LOGO](LICENSE_OF_TRADEMARK_AND_LOGO).
+
+## Made with ❤️ by Emagma
+
+**Emagma has been building bespoke e-commerce projects with Sylius for over ten years.** We provide
+professional services to businesses adopting Sylius as their platform, with a highly experienced
+team — Sylius **Premium Partner**, **Artisan Partner** and **Official Training Partner**.
+
+Open-sourcing this plugin is how we give back to the ecosystem we build on every day.
+
+## Professional services
+
+Need some professional support for a Sylius project? Send us an email at **<sales@emagma.fr>** and
+let us know how we can help — the people who answer you are the ones you will work with.
+
+| | |
+| --- | --- |
+| **Consulting** | Platform choice, architecture and scoping, before you commit a budget |
+| **Project audit & rescue** | Inherited codebase, stalled upgrade, a shop that won't hold peak traffic |
+| **Technical team leadership** | A senior lead embedded in your team |
+| **Training** | Official Sylius Training Partner — your developers productive, fast |
+
+<p>
+    <!-- emagma-padded.svg is the logo on a taller transparent canvas, so that at the same
+         height="96" as the badges it reads at ~32px and sits vertically centred. GitHub strips
+         CSS from READMEs, so the alignment lives in the asset rather than in a style attribute. -->
+    <a href="https://www.emagma.fr"><img src="etc/emagma/emagma-padded.svg" alt="Emagma" height="96"></a>
+    &nbsp;
+    <img src="etc/emagma/sylius-premium-partner.svg" alt="Sylius Premium Partner" height="96">
+    &nbsp;
+    <img src="etc/emagma/sylius-artisan-partner.svg" alt="Sylius Artisan Partner" height="96">
+    &nbsp;
+    <img src="etc/emagma/sylius-official-training-partner.svg" alt="Sylius Official Training Partner" height="96">
 </p>
 
 ## Demo
@@ -67,7 +107,7 @@ writing, and does not get lost.
 | --- | --- |
 | PHP | `^8.2` |
 | Sylius | `^2.0` |
-| Symfony | `6.4` or `7.x` |
+| Symfony | `7.4` (or `6.4`) |
 | Database | MySQL / MariaDB (the shipped migration is MySQL-specific) |
 
 No front-end build is required: the plugin ships no JavaScript and no compiled assets.
@@ -127,7 +167,7 @@ the plugin, not something you run from inside your own project:
 ```bash
 git clone https://github.com/emagma/sylius-order-withdrawal-plugin.git
 cd sylius-order-withdrawal-plugin
-docker build -f docker/demo/Dockerfile --build-arg SYMFONY_VERSION="6.4.*" -t owp-demo .
+docker build -f docker/demo/Dockerfile --build-arg SYMFONY_VERSION="7.4.*" -t owp-demo .
 docker run --rm -p 8080:80 -p 8025:8025 owp-demo
 ```
 
@@ -171,29 +211,26 @@ Issues and pull requests are welcome. Please read **[CONTRIBUTING.md](CONTRIBUTI
 covers which branch to target (there is one per Sylius line), the quality gate your PR has to pass,
 and how to run the test suites locally.
 
-GitHub issues are for **bugs and feature requests only**, not for support — see below.
+GitHub issues are the place for **bugs and feature requests**; for hands-on help, see Support below.
 
 ## Support
 
-Emagma open-sources this plugin **as is**, under the MIT license. There is no warranty, and no
-implied obligation to respond, fix or maintain.
+This plugin is released under the MIT license, which means it comes **without warranty or
+liability** — validating it for your own shop and your own jurisdiction is on you.
+
+That said, we use it ourselves and we care about it. We read what comes in, and we do our best to
+process feedback, fix bugs and review pull requests that keep the spirit of the plugin: simple,
+customisable, and focused on notifying and triaging withdrawal requests rather than becoming a
+returns engine. We can't promise a timeline — this is shared work on top of client projects — but
+your report won't fall into a void.
 
 | I want to… | Go to |
 | --- | --- |
 | Report a bug or request a feature | [GitHub issues](../../issues), with a reproduction |
 | Ask the community for help | [Sylius Slack](https://sylius.com/slack) |
-| Get professional, paid support | <support@emagma.fr> — French native, English best effort |
+| Get pro support | <support@emagma.fr> — French native, English best effort |
 | Report a security vulnerability | <security@emagma.fr> — privately, never a public issue ([policy](SECURITY.md)) |
 
-Please do **not** open GitHub issues for installation help, integration questions or "how do I…?"
-— they will be closed and redirected.
+For installation help, integration questions or "how do I…?", the Sylius Slack will usually get you
+an answer faster than an issue here — that's where the whole community is.
 
-## Credits
-
-Built and maintained by [Emagma](https://emagma.fr).
-
-## License
-
-Released under the [MIT license](LICENSE). Sylius, the Sylius logo and the Sylius name are
-trademarks of Sylius Sp. z o.o. — see
-[LICENSE_OF_TRADEMARK_AND_LOGO](LICENSE_OF_TRADEMARK_AND_LOGO).

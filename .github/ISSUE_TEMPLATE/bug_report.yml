@@ -5,9 +5,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting. Please note this tracker is for **bugs and feature requests only** —
-        installation help and integration questions go to the [Sylius Slack](https://sylius.com/slack),
-        or to support@emagma.fr for paid support.
+        Thanks for reporting — we read everything that comes in. This tracker is for **bugs and
+        feature requests**; for installation help or integration questions the
+        [Sylius Slack](https://sylius.com/slack) is usually faster, and support@emagma.fr covers
+        pro support on your own project.
 
         Before filing, please check the [docs](../../tree/main/docs) — in particular
         [testing.md](../../blob/main/docs/dev/testing.md), which lists known issues.
@@ -61,7 +62,7 @@ body:
       label: Steps to reproduce
       description: >-
         Be specific enough that a maintainer can follow them on a fresh Sylius install, or on the
-        demo image (`docker/demo/`). A bug nobody can reproduce usually gets closed.
+        demo image (`docker/demo/`). The more reproducible the report, the sooner it gets fixed.
       placeholder: |
         1. Install the plugin on a fresh Sylius 2.1 shop
         2. Go to /en_US/withdrawal-request

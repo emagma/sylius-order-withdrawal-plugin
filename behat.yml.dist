@@ -13,11 +13,10 @@ default:
 
         Behat\MinkExtension:
             files_path: "vendor/sylius/sylius/src/Sylius/Behat/Resources/fixtures/"
-            # The dev stack's test vhost (APP_ENV=test). The in-stack headless browser resolves
-            # this .wip domain to loopback via the app container's extra_hosts; keep it in sync
-            # with TEST_DOMAIN in .docker/.env. TLS is self-signed (mkcert) — validate_certificate
-            # below is false so the chrome session accepts it.
-            base_url: "https://test.plugin.sylius.wip/"
+            # Whatever serves your test environment (APP_ENV=test). Copy this file to behat.yml
+            # (gitignored) and point it at your own host. `validate_certificate: false` below lets
+            # the chrome session accept a self-signed certificate, so https works locally too.
+            base_url: "http://localhost:8080/"
             default_session: symfony
             javascript_session: chrome
             sessions:

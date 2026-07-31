@@ -8,11 +8,10 @@ read three other projects' guides to open a good pull request here.
 **Bug reports and feature requests** go to [GitHub issues](../../issues), using one of the
 templates.
 
-**Support questions do not.** "How do I install this", "it doesn't work with my theme", "can you
-help me integrate X" — those go to the [Sylius Slack](https://sylius.com/slack), or to
-<support@emagma.fr> if you want paid help. Support issues get closed and redirected. This is
-not unfriendliness: the plugin is open-sourced as is, and the maintainers' time for free
-one-to-one support is zero.
+**Support questions are better placed elsewhere.** "How do I install this", "it doesn't work with
+my theme", "can you help me integrate X" — the [Sylius Slack](https://sylius.com/slack) will
+usually get you an answer faster, because the whole community is there rather than a couple of
+maintainers. For hands-on help on your own project, <support@emagma.fr> covers pro support.
 
 **For anything larger than a bug fix, open an issue first.** A short "here's what I want to do and
 roughly how" saves you from writing a PR that gets turned down on approach.

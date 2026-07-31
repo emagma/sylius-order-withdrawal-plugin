@@ -18,7 +18,7 @@ when@test:
     emagma_sylius_order_withdrawal:
         notification_email: 'sav@example.com'
 
-    # The dev stack's test vhost forces APP_DEBUG=0 (see .docker/Caddyfile), while the Behat
+    # A webserver serving the test environment typically runs with APP_DEBUG=0, while the Behat
     # CLI process inherits the container's default APP_DEBUG=1 — two different debug flags for
     # the same "test" environment. Symfony's cache-pool namespace defaults to a seed built from
     # `kernel.container_class`, which differs between a debug and non-debug container. Without

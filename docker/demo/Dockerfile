@@ -2,6 +2,9 @@
 #
 # Self-contained demo image for the Emagma Sylius Order Withdrawal plugin.
 #
+# Boots a complete Sylius shop with this plugin mounted, so anyone can try the withdrawal
+# feature end to end without installing PHP, Node or a database:
+#
 #   FrankenPHP (serves the Sylius test application that mounts this plugin)
 #   + Mailpit   (captures every outgoing email — web UI on :8025)
 #   + SQLite    (file-backed DB baked into the image — no external service)
@@ -9,21 +12,21 @@
 #
 # Dependencies are resolved at build time for the Symfony line given by SYMFONY_VERSION
 # (Flex reads it from extra.symfony.require), so the same Dockerfile produces one image per
-# supported Symfony line — see .gitlab-ci.yml for the 6.4 / 7.1 matrix (Sylius 2.0 core itself
-# requires ^6.4.1 || ^7.1). Build context is the repo root; vendor/ is resolved fresh (it is
-# excluded via .dockerignore).
+# supported Symfony line (Sylius 2.x core requires ^6.4 || ^7.4). Build context is
+# the repo root; vendor/ is resolved fresh (it is excluded via .dockerignore).
 #
-# Image name = project registry; tag = "<branch>-sf<major>", e.g. 2.0-sf6 / 2.0-sf7:
-#   IMAGE=registry.gitlab.com/emagma/sylius-plugins/order-withdrawal-plugin
+# Build (from a clone of this repository):
 #   docker build -f docker/demo/Dockerfile \
-#     --build-arg SYMFONY_VERSION="6.4.*" -t "$IMAGE:2.0-sf6" .
+#     --build-arg SYMFONY_VERSION="7.4.*" -t owp-demo .
 #
-# Run (try the demo):
-#   docker run --rm -p 8080:80 -p 8025:8025 "$IMAGE:2.0-sf6"
+# Run:
+#   docker run --rm -p 8080:80 -p 8025:8025 owp-demo
 #   → shop at http://localhost:8080  ·  Mailpit at http://localhost:8025
 #
-# Run (CI, e.g. the test suite against the provisioned DB):
-#   docker run --rm "$IMAGE:2.0-sf6" vendor/bin/phpunit
+# Any argument is exec'd instead of the server, against the provisioned database:
+#   docker run --rm owp-demo vendor/bin/phpunit
+#
+# This image is for evaluation and development only — it is not a production artifact.
 ARG PHP_VERSION=8.3
 ARG FRANKENPHP_VERSION=1.12.4
 ARG COMPOSER_VERSION=2
@@ -38,8 +41,8 @@ FROM axllent/mailpit:${MAILPIT_VERSION} AS mailpit
 
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php${PHP_VERSION}
 
-# Which Symfony line to resolve. The dev-deps already allow ^6.4 || ^7.1; Flex pins the rest.
-ARG SYMFONY_VERSION=6.4.*
+# Which Symfony line to resolve. Sylius 2.x allows ^6.4 || ^7.4; Flex pins the rest.
+ARG SYMFONY_VERSION=7.4.*
 ENV SYMFONY_VERSION=${SYMFONY_VERSION}
 
 # SQLite driver + the extensions Sylius needs.
@@ -62,7 +65,7 @@ COPY docker/demo/php.ini ${PHP_INI_DIR}/conf.d/zz-demo.ini
 # (paths resolve against the plugin root, i.e. /app). Mirrors the dev stack's env.
 ENV APP_ENV=dev \
     APP_DEBUG=0 \
-    APP_SECRET=feature_test_secret \
+    APP_SECRET=demo_secret \
     DATABASE_URL="sqlite:////app/var/withdrawal.sqlite" \
     MAILER_DSN="smtp://127.0.0.1:1025" \
     SYLIUS_FIXTURES_HOSTNAME=localhost \

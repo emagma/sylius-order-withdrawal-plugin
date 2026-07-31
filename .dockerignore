@@ -1,11 +1,10 @@
 # Build context trimming for the demo image (docker/demo/Dockerfile),
-# whose build context is the repo root. The local dev stack (.docker/) has its own build
-# with a .docker/ context, so it is unaffected by this file.
+# whose build context is the repository root.
 .git
 .idea
 .claude
 .playwright-mcp
-# The local-only dev stack is not needed in the demo image.
+# Local-only tooling, never needed in the image.
 .docker
 docs
 spec

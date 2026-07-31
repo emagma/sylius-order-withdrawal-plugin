@@ -15,15 +15,15 @@ as broken images until the assets land here. Filenames below are the ones refere
 | `admin-grid.png` | `README.md`, `usage/admin-guide.md` | The admin grid with a handful of requests in mixed states |
 | `admin-show.png` | `README.md`, `usage/admin-guide.md` | One request's detail page, with its transition buttons visible |
 
-The plugin's logo is **not** in this directory: it lives at the repository root as
-`EmagmaOrderWithdrawalPlugin.svg`, where the README header references it.
+Brand assets are **not** in this directory: the plugin logo, the Emagma logo and the Sylius
+partner badges all live in `etc/emagma/`, where the README header references them.
 
 ## How to capture them
 
 Everything can be produced against the demo image, which ships fixtures and a mail catcher:
 
 ```bash
-docker build -f docker/demo/Dockerfile --build-arg SYMFONY_VERSION="6.4.*" -t owp-demo .
+docker build -f docker/demo/Dockerfile --build-arg SYMFONY_VERSION="7.4.*" -t owp-demo .
 docker run --rm -p 8080:80 -p 8025:8025 owp-demo
 ```
 
