@@ -47,7 +47,7 @@ jobs:
       SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
