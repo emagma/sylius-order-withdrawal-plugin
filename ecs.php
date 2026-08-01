@@ -9,7 +9,7 @@ return static function (ECSConfig $config): void {
     $config->import('vendor/sylius-labs/coding-standard/ecs.php');
 
     $config->parallel();
-    $config->paths(['src', 'spec', 'tests']);
+    $config->paths(['src', 'tests']);
     $config->skip([
         '**/var/*',
         'src/Migrations/*',

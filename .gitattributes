@@ -11,9 +11,7 @@
 /etc export-ignore
 /features export-ignore
 /node_modules export-ignore
-/phpspec.yml.dist export-ignore
 /phpstan.neon export-ignore
 /phpunit.xml.dist export-ignore
 /rector.php export-ignore
-/spec export-ignore
 /tests export-ignore

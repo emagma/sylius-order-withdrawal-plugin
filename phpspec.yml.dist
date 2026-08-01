@@ -1,5 +1,0 @@
-suites:
-    main:
-        namespace: Emagma\SyliusOrderWithdrawalPlugin
-        psr4_prefix: Emagma\SyliusOrderWithdrawalPlugin
-        src_path: src

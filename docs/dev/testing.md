@@ -9,10 +9,8 @@ as its test environment. There is no test application bundled in this repository
 composer install
 ```
 
-> **PHP 8.4 note.** `composer.json` declares `php: ^8.2`, but the dev dependency
-> `phpspec/phpspec ^7.5` supports PHP 8.3 at most, so `composer install` fails outright on 8.4.
-> Until that constraint is resolved, develop on **PHP 8.2 or 8.3**, or install with
-> `composer install --ignore-platform-req=php`.
+Any PHP version matching the declared `php: ^8.2` works — 8.2, 8.3 and 8.4 are all supported
+and covered by CI.
 
 ## The quality gate
 
@@ -87,11 +85,6 @@ Pin `sylius/sylius` to `2.0.*` or `2.1.*` locally to run them, and please don't 
 issue for it.
 
 <!-- TODO(maintainers): fix the import (Sylius\Behat\Page\SyliusPage or the FoB SymfonyPage) and delete this section. -->
-
-## phpspec
-
-`phpspec.yml.dist` is configured, but `spec/` is empty — the plugin uses PHPUnit. You do not need
-to run `vendor/bin/phpspec`.
 
 ## Running everything in Docker
 

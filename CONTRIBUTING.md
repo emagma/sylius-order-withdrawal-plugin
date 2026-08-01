@@ -42,8 +42,7 @@ cd order-withdrawal-plugin
 composer install
 ```
 
-> **Use PHP 8.2 or 8.3.** The dev dependency `phpspec/phpspec ^7.5` does not support PHP 8.4, so
-> `composer install` fails there. `composer install --ignore-platform-req=php` works around it.
+> **PHP 8.2, 8.3 or 8.4.** All three are supported and covered by CI.
 
 The fastest way to see your change in a running shop is the demo image:
 

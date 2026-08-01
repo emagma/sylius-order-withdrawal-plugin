@@ -7,7 +7,6 @@
 # Local-only tooling, never needed in the image.
 .docker
 docs
-spec
 var/cache
 var/log
 var/sessions
