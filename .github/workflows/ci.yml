@@ -67,14 +67,24 @@ jobs:
       - name: Analyse
         run: vendor/bin/phpstan analyse --no-progress
 
+  # Every Sylius 2.x line accepts either Symfony 6.4 LTS or a 7.x line; what moves between
+  # minors is only the floor of the 7.x branch (2.0 -> ^7.1, 2.1 -> ^7.2, 2.2 -> ^7.4). So the
+  # legs below are explicit pairs, not a cross-product: each Sylius line is tested against the
+  # LTS and against the newest 7.x it actually declares. composer.json allows ^2.0, which is
+  # why 2.0 is still covered — drop these legs only together with that constraint.
   tests:
-    name: "Tests (PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }})"
+    name: "Tests (Sylius ${{ matrix.sylius }}, Symfony ${{ matrix.symfony }}, PHP ${{ matrix.php }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ["8.2", "8.3", "8.4"]
-        symfony: ["6.4.*", "7.4.*"]
+        include:
+          - { sylius: "2.0.*", symfony: "6.4.*", php: "8.2" }
+          - { sylius: "2.0.*", symfony: "7.1.*", php: "8.3" }
+          - { sylius: "2.2.*", symfony: "6.4.*", php: "8.3" }
+          - { sylius: "2.2.*", symfony: "7.4.*", php: "8.2" }
+          - { sylius: "2.2.*", symfony: "7.4.*", php: "8.3" }
+          - { sylius: "2.2.*", symfony: "7.4.*", php: "8.4" }
     steps:
       - uses: actions/checkout@v4
 
@@ -85,8 +95,10 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Restrict Symfony to ${{ matrix.symfony }}
-        run: composer config extra.symfony.require "${{ matrix.symfony }}"
+      - name: Select Sylius ${{ matrix.sylius }} and Symfony ${{ matrix.symfony }}
+        run: |
+          composer require sylius/sylius:"${{ matrix.sylius }}" --no-update --no-interaction
+          composer config extra.symfony.require "${{ matrix.symfony }}"
 
       - name: Install dependencies
         run: composer update --no-interaction --no-progress --prefer-dist --no-scripts

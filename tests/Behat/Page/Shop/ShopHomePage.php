@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop;
 
-use Sylius\Behat\Page\SymfonyPage;
+use FriendsOfBehat\PageObjectExtension\Page\SymfonyPage;
 
 final class ShopHomePage extends SymfonyPage implements ShopHomePageInterface
 {

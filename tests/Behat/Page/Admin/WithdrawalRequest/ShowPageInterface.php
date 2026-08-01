@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest;
 
-use Sylius\Behat\Page\SymfonyPageInterface;
+use FriendsOfBehat\PageObjectExtension\Page\SymfonyPageInterface;
 
 interface ShowPageInterface extends SymfonyPageInterface
 {
