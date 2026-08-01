@@ -1,13 +1,6 @@
-# Acceptance suites, run on demand only.
-#
-# MANUAL TRIGGER ON PURPOSE — four scenarios still fail, and the cause is in the test code,
-# not in the pipeline. emagma_order_withdrawal_accessing and _browsing pass; _requesting is
-# 11/15, failing on the shop-side confirmation assertion and on the after-sales notification
-# email. Once those are fixed, move this job into ci.yml and drop the workflow_dispatch-only
-# trigger.
-#
-# The emagma_order_withdrawal_processing suite is excluded regardless: its scenarios are
-# @javascript and need a served application plus a headless Chrome on 127.0.0.1:9222.
+# Acceptance suites. Manual trigger until the _requesting suite is green (11/15 today);
+# _accessing and _browsing pass. Then move this job into ci.yml.
+# _processing stays out regardless: @javascript, needs a served app and headless Chrome.
 name: Behat
 
 on:
