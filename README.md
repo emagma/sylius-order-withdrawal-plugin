@@ -1,5 +1,5 @@
 <p align="center">
-    <!-- TODO(release): add the Build badge once the GitHub Actions workflow exists. -->
+    <a href="https://github.com/emagma/sylius-order-withdrawal-plugin/actions/workflows/ci.yml"><img src="https://github.com/emagma/sylius-order-withdrawal-plugin/actions/workflows/ci.yml/badge.svg" alt="Build"></a>
     <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/v/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist version"></a>
     <a href="https://packagist.org/packages/emagma/sylius-order-withdrawal-plugin"><img src="https://img.shields.io/packagist/dt/emagma/sylius-order-withdrawal-plugin.svg" alt="Packagist downloads"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
@@ -106,7 +106,7 @@ writing, and does not get lost.
 | | Version |
 | --- | --- |
 | PHP | `^8.2` |
-| Sylius | `^2.0` |
+| Sylius | `^2.1` |
 | Symfony | `7.4` (or `6.4`) |
 | Database | MySQL / MariaDB (the shipped migration is MySQL-specific) |
 

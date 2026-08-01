@@ -75,16 +75,13 @@ Running bare `vendor/bin/behat` also picks up Sylius's own core suites, which ar
 
   `behat.yml` is gitignored, so your local URL never lands in a commit.
 
-### Known issue on Sylius ≥ 2.2
+### Known failures
 
-The Behat page objects import `Sylius\Behat\Page\SymfonyPage`, which was **removed in Sylius 2.2**.
-Since `composer.json` allows `sylius/sylius: ^2.0`, a fresh `composer install` resolves to 2.2.x and
-the suites fatal on boot with `Class "Sylius\Behat\Page\SymfonyPage" not found`.
+Four scenarios in the `emagma_order_withdrawal_requesting` suite still fail — the shop-side
+confirmation assertion and the after-sales notification email. The other non-JavaScript suites
+pass. Please don't file a duplicate issue for these.
 
-Pin `sylius/sylius` to `2.0.*` or `2.1.*` locally to run them, and please don't file a duplicate
-issue for it.
-
-<!-- TODO(maintainers): fix the import (Sylius\Behat\Page\SyliusPage or the FoB SymfonyPage) and delete this section. -->
+<!-- TODO(maintainers): fix the four requesting scenarios, then move behat into ci.yml. -->
 
 ## Running everything in Docker
 

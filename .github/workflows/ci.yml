@@ -4,7 +4,7 @@
 # There is no committed composer.lock (it is gitignored), so every job resolves dependencies
 # with `composer update`. The Symfony line is selected the same way the demo image does it —
 # by rewriting `extra.symfony.require` before the update, so Flex pins the whole tree to it.
-# Sylius 2.x core accepts ^6.4 || ^7.4; see docker/demo/Dockerfile for the reference setup.
+# Sylius 2.2 accepts ^6.4.1 || ^7.4; see docker/demo/Dockerfile for the reference setup.
 name: CI
 
 on:
@@ -67,21 +67,34 @@ jobs:
       - name: Analyse
         run: vendor/bin/phpstan analyse --no-progress
 
-  # Every Sylius 2.x line accepts either Symfony 6.4 LTS or a 7.x line; what moves between
-  # minors is only the floor of the 7.x branch (2.0 -> ^7.1, 2.1 -> ^7.2, 2.2 -> ^7.4). So the
-  # legs below are explicit pairs, not a cross-product: each Sylius line is tested against the
-  # LTS and against the newest 7.x it actually declares. composer.json allows ^2.0, which is
-  # why 2.0 is still covered — drop these legs only together with that constraint.
+  # Matrix policy: the two most recent Sylius lines, each against the Symfony line(s) it
+  # actually declares.
+  #
+  # Sylius spans two Symfony majors — 2.1 allows ^6.4.1 || ^7.2, 2.2 allows ^6.4.1 || ^7.4 —
+  # but only the newest minor of each major is tested. Symfony's last minor of a major is its
+  # LTS (6.4, 7.4); the intermediate releases (7.1, 7.2, 7.3) are standard ones, already out
+  # of support, and nobody should be starting a shop on them. So the axis is "latest minor
+  # per Symfony major that the Sylius line accepts", which for both supported lines is 6.4
+  # and 7.4. The legs below are explicit triples marking the edges of that surface:
+  #
+  #   6.4 LTS   lowest supported everything (2.1 / PHP 8.2) and highest (2.2 / PHP 8.4)
+  #   7.4 LTS   both Sylius lines; the newest line across every supported PHP
+  #
+  # composer.json requires ^2.1 — 2.0 is absent from the upstream support table. Keep the two
+  # in step: every leg must be installable per the manifest, and every line the manifest
+  # allows must appear in a leg.
   tests:
-    name: "Tests (Sylius ${{ matrix.sylius }}, Symfony ${{ matrix.symfony }}, PHP ${{ matrix.php }})"
+    name: "Sylius ${{ matrix.sylius }} · Symfony ${{ matrix.symfony }} · PHP ${{ matrix.php }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { sylius: "2.0.*", symfony: "6.4.*", php: "8.2" }
-          - { sylius: "2.0.*", symfony: "7.1.*", php: "8.3" }
-          - { sylius: "2.2.*", symfony: "6.4.*", php: "8.3" }
+          # Symfony 6.4 LTS — lowest and highest supported combinations.
+          - { sylius: "2.1.*", symfony: "6.4.*", php: "8.2" }
+          - { sylius: "2.2.*", symfony: "6.4.*", php: "8.4" }
+          # Symfony 7.4 LTS — oldest supported Sylius, then newest across every supported PHP.
+          - { sylius: "2.1.*", symfony: "7.4.*", php: "8.2" }
           - { sylius: "2.2.*", symfony: "7.4.*", php: "8.2" }
           - { sylius: "2.2.*", symfony: "7.4.*", php: "8.3" }
           - { sylius: "2.2.*", symfony: "7.4.*", php: "8.4" }

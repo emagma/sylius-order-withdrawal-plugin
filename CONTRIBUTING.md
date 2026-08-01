@@ -23,8 +23,8 @@ This repository follows the Sylius compatibility-branch model:
 | Branch | Targets |
 | --- | --- |
 | `main` | the newest supported Sylius line |
-| `2.0` | Sylius `^2.0` |
-| `1.14` | Sylius `^1.14` |
+| `2.0` | Sylius `^2.1` |
+| `1.14` | Sylius `^1.14` (Sylius LTS) |
 
 **Target the oldest branch your change applies to.** A bug fix that affects both lines goes to
 `1.14`; a feature that only makes sense on Sylius 2 goes to the 2.x branch. Maintainers forward-port
@@ -70,7 +70,7 @@ every PHP file must carry.
 
 Behat needs a MySQL database, a `behat.yml` of your own, and — for the `@javascript` scenarios — a
 headless Chrome. [docs/dev/testing.md](docs/dev/testing.md) covers the setup, the four suite names,
-and a known incompatibility with Sylius ≥ 2.2.
+and the scenarios that are known to fail.
 
 If you genuinely cannot run Behat locally, say so in the PR rather than skipping it silently.
 

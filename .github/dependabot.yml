@@ -7,7 +7,7 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     labels: ["dependencies"]
-    # Runtime constraints are deliberately wide (sylius/sylius ^2.0, php ^8.2) so the plugin
+    # Runtime constraints are deliberately wide (sylius/sylius ^2.1, php ^8.2) so the plugin
     # stays installable across the whole line — only dev tooling should be bumped here.
     allow:
       - dependency-type: development

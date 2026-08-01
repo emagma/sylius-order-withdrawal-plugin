@@ -1,17 +1,10 @@
 # Acceptance suites, run on demand only.
 #
-# MANUAL TRIGGER ON PURPOSE — this workflow does not pass yet, and the cause is in the test
-# code, not in the pipeline. tests/Behat/Page/**  extends Sylius\Behat\Page\SymfonyPage and
-# implements Sylius\Behat\Page\SymfonyPageInterface. Both classes were renamed upstream to
-# SyliusPage / SyliusPageInterface, and no longer exist in sylius/sylius 2.2. Since the plugin
-# has no committed composer.lock, CI always resolves the newest 2.x and every suite dies while
-# the container builds the page services:
-#
-#   Uncaught Error: Class "Sylius\Behat\Page\SymfonyPage" not found
-#
-# The rename is a drop-in (SyliusPage extends the same FriendsOfBehat SymfonyPage). Once the
-# six page objects are updated and the suites are confirmed green, move these jobs into ci.yml
-# and drop the workflow_dispatch-only trigger.
+# MANUAL TRIGGER ON PURPOSE — four scenarios still fail, and the cause is in the test code,
+# not in the pipeline. emagma_order_withdrawal_accessing and _browsing pass; _requesting is
+# 11/15, failing on the shop-side confirmation assertion and on the after-sales notification
+# email. Once those are fixed, move this job into ci.yml and drop the workflow_dispatch-only
+# trigger.
 #
 # The emagma_order_withdrawal_processing suite is excluded regardless: its scenarios are
 # @javascript and need a served application plus a headless Chrome on 127.0.0.1:9222.
