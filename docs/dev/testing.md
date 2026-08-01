@@ -81,7 +81,11 @@ Four scenarios in the `emagma_order_withdrawal_requesting` suite still fail — 
 confirmation assertion and the after-sales notification email. The other non-JavaScript suites
 pass. Please don't file a duplicate issue for these.
 
-<!-- TODO(maintainers): fix the four requesting scenarios, then move behat into ci.yml. -->
+CI runs all three non-JavaScript suites on every push and pull request, one step per suite, so
+these failures are visible in the Behat check rather than hidden behind a manual trigger. The
+check stays red until they are fixed.
+
+<!-- TODO(maintainers): fix the four requesting scenarios. -->
 
 ## Running everything in Docker
 

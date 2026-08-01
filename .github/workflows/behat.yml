@@ -1,10 +1,22 @@
-# Acceptance suites. Manual trigger until the _requesting suite is green (11/15 today);
-# _accessing and _browsing pass. Then move this job into ci.yml.
-# _processing stays out regardless: @javascript, needs a served app and headless Chrome.
+# Acceptance suites. Kept out of ci.yml because these need MySQL and a built test
+# application, so the fast checks stay independently re-runnable.
+# _processing stays out: @javascript, needs a served app and headless Chrome.
+# One step per suite — a failing suite must not hide the verdict of the next.
 name: Behat
 
 on:
+  push:
+    branches:
+      - main
+      - "2.0"
+      - "1.14"
+      - docs/open-source-documentation
+  pull_request: ~
   workflow_dispatch: ~
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   COMPOSER_MEMORY_LIMIT: -1
@@ -66,14 +78,16 @@ jobs:
           vendor/bin/console doctrine:database:create --if-not-exists --no-interaction
           vendor/bin/console doctrine:schema:create --no-interaction
 
-      - name: Run Behat
-        run: |
-          vendor/bin/behat --strict --no-interaction -f progress \
-            --suite=emagma_order_withdrawal_requesting
-          vendor/bin/behat --strict --no-interaction -f progress \
-            --suite=emagma_order_withdrawal_accessing
-          vendor/bin/behat --strict --no-interaction -f progress \
-            --suite=emagma_order_withdrawal_browsing
+      - name: Behat — requesting
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_requesting
+
+      - name: Behat — accessing
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_accessing
+
+      - name: Behat — browsing
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_browsing
 
       - name: Upload Behat debug output
         if: failure()
