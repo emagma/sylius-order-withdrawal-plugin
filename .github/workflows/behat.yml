@@ -1,0 +1,98 @@
+# Acceptance suites, run on demand only.
+#
+# MANUAL TRIGGER ON PURPOSE — this workflow does not pass yet, and the cause is in the test
+# code, not in the pipeline. tests/Behat/Page/**  extends Sylius\Behat\Page\SymfonyPage and
+# implements Sylius\Behat\Page\SymfonyPageInterface. Both classes were renamed upstream to
+# SyliusPage / SyliusPageInterface, and no longer exist in sylius/sylius 2.2. Since the plugin
+# has no committed composer.lock, CI always resolves the newest 2.x and every suite dies while
+# the container builds the page services:
+#
+#   Uncaught Error: Class "Sylius\Behat\Page\SymfonyPage" not found
+#
+# The rename is a drop-in (SyliusPage extends the same FriendsOfBehat SymfonyPage). Once the
+# six page objects are updated and the suites are confirmed green, move these jobs into ci.yml
+# and drop the workflow_dispatch-only trigger.
+#
+# The emagma_order_withdrawal_processing suite is excluded regardless: its scenarios are
+# @javascript and need a served application plus a headless Chrome on 127.0.0.1:9222.
+name: Behat
+
+on:
+  workflow_dispatch: ~
+
+env:
+  COMPOSER_MEMORY_LIMIT: -1
+
+jobs:
+  behat:
+    name: Behat (non-JavaScript suites)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "mysql://root@127.0.0.1:3306/sylius_test"
+      SYLIUS_TEST_APP_BUNDLES_PATH: tests/TestApplication/bundles.php
+      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml"
+      SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: intl, gd, zip, bcmath, exif, pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts
+
+      # The Twig templates these suites render go through WebpackEncoreBundle, which needs a
+      # real entrypoints.json — so the test application's assets have to be built even though
+      # the symfony session never opens a browser.
+      - name: Build test application assets
+        run: |
+          APP=vendor/sylius/test-application
+          yarn --cwd "$APP" install --frozen-lockfile
+          yarn --cwd "$APP" encore dev
+          vendor/bin/console assets:install "$APP/public" --no-interaction
+
+      - name: Prepare database
+        run: |
+          vendor/bin/console doctrine:database:create --if-not-exists --no-interaction
+          vendor/bin/console doctrine:schema:create --no-interaction
+
+      - name: Run Behat
+        run: |
+          vendor/bin/behat --strict --no-interaction -f progress \
+            --suite=emagma_order_withdrawal_requesting
+          vendor/bin/behat --strict --no-interaction -f progress \
+            --suite=emagma_order_withdrawal_accessing
+          vendor/bin/behat --strict --no-interaction -f progress \
+            --suite=emagma_order_withdrawal_browsing
+
+      - name: Upload Behat debug output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: behat-debug
+          path: etc/build
+          if-no-files-found: ignore
