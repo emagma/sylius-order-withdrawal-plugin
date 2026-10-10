@@ -1,0 +1,21 @@
+# Build context trimming for the demo image (docker/demo/Dockerfile), whose build context is
+# the repo root. The local dev stack (docker/dev/) has its own build with a docker/dev/
+# context, so it is unaffected by this file.
+.git
+.idea
+.claude
+.playwright-mcp
+# The local-only dev stack is not needed in the demo image.
+docker/dev
+docs
+var/cache
+var/log
+var/sessions
+# Resolved fresh inside the image (per Symfony line), so keep the host copy out.
+vendor
+composer.lock
+# JS deps are installed/built inside the image.
+node_modules
+**/node_modules
+**/*.sqlite
+.phpunit.result.cache

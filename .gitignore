@@ -1,0 +1,23 @@
+/composer.lock
+/node_modules/
+/yarn.lock
+/var/
+/vendor/
+/.phpunit.result.cache
+/behat.yml
+/etc/build/*
+!/etc/build/.gitkeep
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.*.local
+###< symfony/framework-bundle ###
+
+# Test application local environment overrides
+/tests/TestApplication/.env.local
+/tests/TestApplication/.env.*.local
+
+# Local tooling
+/.playwright-mcp/
+/.mcp.json
+/.claude/

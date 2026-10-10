@@ -1,0 +1,62 @@
+default:
+    suites:
+        # Domain suite: drives the goal features in shop/ & admin/ through Sylius core
+        # contexts (channel setup, email checking) plus this plugin's WithdrawalRequestContext.
+        emagma_order_withdrawal_requesting:
+            paths:
+                - "%paths.base%/features/shop/requesting_order_withdrawal.feature"
+            contexts:
+                - sylius.behat.context.hook.doctrine_orm
+                - sylius.behat.context.transform.shared_storage
+                - sylius.behat.context.setup.channel
+                - sylius.behat.context.hook.mailer
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\RequestingWithdrawalContext
+            filters:
+                tags: "@managing_order_withdrawal_requests"
+
+        # Accessing the form: the customer reaches it from the shop footer link
+        # (injected via the sylius_ui footer.grid event).
+        emagma_order_withdrawal_accessing:
+            paths:
+                - "%paths.base%/features/shop/accessing_withdrawal_form.feature"
+            contexts:
+                - sylius.behat.context.hook.doctrine_orm
+                - sylius.behat.context.transform.shared_storage
+                - sylius.behat.context.setup.channel
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\AccessingWithdrawalFormContext
+            filters:
+                tags: "@managing_order_withdrawal_requests"
+
+        # Admin: browsing and filtering the submitted withdrawal requests (non-JS, symfony session).
+        emagma_order_withdrawal_browsing:
+            paths:
+                - "%paths.base%/features/admin/browsing_withdrawal_requests.feature"
+            contexts:
+                - sylius.behat.context.hook.doctrine_orm
+                - sylius.behat.context.transform.shared_storage
+                - sylius.behat.context.setup.channel
+                - sylius.behat.context.setup.admin_security
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Admin\ManagingWithdrawalRequestsContext
+            filters:
+                tags: "@managing_order_withdrawal_requests"
+
+        # Admin: processing a request through its state-machine transitions. Browser-less: the
+        # transition controls are plain <form method="post"> submits carrying _method=PUT, with
+        # no Stimulus controller or click handler, so the symfony session drives them exactly as
+        # a browser would. Tag a scenario @javascript here only if a transition ever grows real
+        # JS behaviour (a confirm modal, an async submit) — that also means giving CI a Chrome
+        # service and a served app, which behat.yml deliberately does not have.
+        emagma_order_withdrawal_processing:
+            paths:
+                - "%paths.base%/features/admin/processing_withdrawal_request.feature"
+            contexts:
+                - sylius.behat.context.hook.doctrine_orm
+                - sylius.behat.context.transform.shared_storage
+                - sylius.behat.context.setup.channel
+                - sylius.behat.context.setup.admin_security
+                - sylius.behat.context.hook.mailer
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Admin\ManagingWithdrawalRequestsContext
+            filters:
+                tags: "@managing_order_withdrawal_requests"

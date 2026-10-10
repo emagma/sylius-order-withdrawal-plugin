@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!--
+            Loaded only when rate_limiter_service names a limiter, which the extension aliases to
+            emagma_sylius_order_withdrawal.rate_limiter.withdrawal_request.
+        -->
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\EventListener\WithdrawalRequestRateLimitListener">
+            <argument type="service" id="emagma_sylius_order_withdrawal.rate_limiter.withdrawal_request" />
+            <argument>emagma_sylius_order_withdrawal_shop_request</argument>
+            <tag name="kernel.event_listener" event="kernel.request" priority="8" />
+        </service>
+    </services>
+
+</container>

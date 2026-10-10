@@ -1,0 +1,40 @@
+imports:
+    - vendor/sylius/sylius/src/Sylius/Behat/Resources/config/suites.yml
+    - tests/Behat/Resources/suites/suites.yml
+
+default:
+    extensions:
+        DMore\ChromeExtension\Behat\ServiceContainer\ChromeExtension: ~
+
+        FriendsOfBehat\MinkDebugExtension:
+            directory: etc/build
+            clean_start: false
+            screenshot: true
+
+        Behat\MinkExtension:
+            files_path: "vendor/sylius/sylius/src/Sylius/Behat/Resources/fixtures/"
+            # Whatever serves your test environment (APP_ENV=test). Copy this file to behat.yml
+            # (gitignored) and point it at your own host. `validate_certificate: false` below lets
+            # the chrome session accept a self-signed certificate, so https works locally too.
+            base_url: "http://localhost:8080/"
+            default_session: symfony
+            javascript_session: chrome
+            sessions:
+                symfony:
+                    symfony: ~
+                chrome:
+                    chrome:
+                        api_url: "http://127.0.0.1:9222"
+                        validate_certificate: false
+
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: vendor/sylius/test-application/config/bootstrap.php
+            kernel:
+                class: Sylius\TestApplication\Kernel
+                environment: test
+
+        FriendsOfBehat\VariadicExtension: ~
+
+        FriendsOfBehat\SuiteSettingsExtension:
+            paths:
+                - features

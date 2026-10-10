@@ -1,0 +1,55 @@
+emagma_sylius_order_withdrawal:
+    ui:
+        withdrawal_requests: 'Withdrawal requests'
+        withdrawal_request: 'Withdrawal request'
+    shop:
+        title: 'Withdrawal request'
+        intro: 'You have 14 days from receipt of the product to exercise your right of withdrawal. Fill in the form below to notify our Customer Service, who will process your request. For more information, please see our Terms and Conditions.'
+        cta: 'Confirm the withdrawal request'
+        footer_link: 'Withdrawal request'
+        submit_notice: 'Submitting this form records your withdrawal request and triggers an acknowledgement sent to your email address.'
+    form:
+        first_name: 'First name'
+        last_name: 'Last name'
+        full_name: 'Full name'
+        order_number: 'Order number'
+        order_date: 'Order date'
+        not_yet_received: 'Order not received yet'
+        reception_date: 'Order reception date (optional)'
+        email: 'Email address'
+        scope: 'My withdrawal concerns'
+        message: 'Details (optional)'
+        partial_detail_required: 'Please specify which items your partial withdrawal concerns.'
+        state: 'Status'
+        submitted_at: 'Request date and time'
+        legal_notice: 'I hereby notify you that I withdraw from the contract for the order identified above, and I undertake to return the order at my own expense.'
+        legal_notice_required: 'You must accept the withdrawal notice to continue.'
+    scope:
+        full: 'the totality of my order'
+        partial: 'a part of my order'
+    state:
+        new: 'New'
+        in_progress: 'In progress'
+        confirmed: 'Confirmed'
+        rejected: 'Rejected'
+    transition:
+        start: 'Take in charge'
+        confirm: 'Confirm withdrawal'
+        reject: 'Reject'
+    admin:
+        menu: 'Withdrawal requests'
+        subheader: 'Manage customer withdrawal requests'
+        show_title: 'Withdrawal request'
+    email:
+        greeting: 'Hello %name%,'
+        submitted_at: 'Request date and time'
+        acknowledgement:
+            subject: 'Acknowledgement of your withdrawal request'
+            intro: 'We acknowledge receipt of your withdrawal request for the following:'
+            followup: 'A cancellation confirmation will be sent to you later, once our Customer Service has processed it.'
+        notification:
+            subject: 'New withdrawal request — order %order%'
+            intro: 'A new withdrawal request has been submitted:'
+        confirmation:
+            subject: 'Confirmation of your withdrawal'
+            body: 'Your withdrawal for order %order% has been processed.'

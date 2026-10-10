@@ -1,0 +1,7 @@
+{% set variants = {
+    'new': 'secondary',
+    'in_progress': 'primary',
+    'confirmed': 'success',
+    'rejected': 'danger',
+} %}
+<span class="badge text-bg-{{ variants[data]|default('secondary') }}">{{ ('emagma_sylius_order_withdrawal.state.' ~ data)|trans }}</span>

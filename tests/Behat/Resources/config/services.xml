@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Pages -->
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\RequestWithdrawalPage"
+                 class="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\RequestWithdrawalPage"
+                 parent="sylius.behat.symfony_page" public="false" />
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\ShopHomePage"
+                 class="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\ShopHomePage"
+                 parent="sylius.behat.symfony_page" public="false" />
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\IndexPage"
+                 class="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\IndexPage"
+                 parent="sylius.behat.page.admin.crud.index" public="false">
+            <argument type="string">emagma_sylius_order_withdrawal_admin_withdrawal_request_index</argument>
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\ShowPage"
+                 class="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\ShowPage"
+                 parent="sylius.behat.symfony_page" public="false" />
+
+        <!-- Contexts -->
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\RequestingWithdrawalContext" public="true">
+            <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\RequestWithdrawalPage" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
+            <argument type="service" id="sylius.behat.email_checker" />
+            <argument>%emagma_sylius_order_withdrawal.notification_email%</argument>
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\AccessingWithdrawalFormContext" public="true">
+            <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\ShopHomePage" />
+            <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\RequestWithdrawalPage" />
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext" public="true">
+            <argument type="service" id="sylius.behat.shared_storage" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.factory.withdrawal_request" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.manager.withdrawal_request" />
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Admin\ManagingWithdrawalRequestsContext" public="true">
+            <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\IndexPage" />
+            <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\ShowPage" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
+            <argument type="service" id="sylius.behat.email_checker" />
+        </service>
+    </services>
+
+</container>

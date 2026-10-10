@@ -1,0 +1,102 @@
+# Acceptance suites. Kept out of ci.yml because these need MySQL and a built test
+# application, so the fast checks stay independently re-runnable.
+# All four suites run browser-less through the `symfony` Mink session — no scenario is tagged
+# @javascript, so no headless Chrome and no served app are needed here.
+# One step per suite — a failing suite must not hide the verdict of the next.
+name: Behat
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+  workflow_dispatch: ~
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COMPOSER_MEMORY_LIMIT: -1
+  # The floor from composer.json — the acceptance suites run on the oldest PHP consumers may use.
+  PHP_MINIMUM: "8.2"
+
+jobs:
+  behat:
+    name: Behat (non-JavaScript suites)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "mysql://root@127.0.0.1:3306/sylius_test"
+      SYLIUS_TEST_APP_BUNDLES_PATH: tests/TestApplication/bundles.php
+      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml"
+      SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_MINIMUM }}
+          extensions: intl, gd, zip, bcmath, exif, pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts
+
+      # The Twig templates these suites render go through WebpackEncoreBundle, which needs a
+      # real entrypoints.json — so the test application's assets have to be built even though
+      # the symfony session never opens a browser.
+      - name: Build test application assets
+        run: |
+          APP=vendor/sylius/test-application
+          yarn --cwd "$APP" install --frozen-lockfile
+          yarn --cwd "$APP" encore dev
+          vendor/bin/console assets:install "$APP/public" --no-interaction
+
+      - name: Prepare database
+        run: |
+          vendor/bin/console doctrine:database:create --if-not-exists --no-interaction
+          vendor/bin/console doctrine:schema:create --no-interaction
+
+      - name: Behat — requesting
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_requesting
+
+      - name: Behat — accessing
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_accessing
+
+      - name: Behat — browsing
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_browsing
+
+      - name: Behat — processing
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_processing
+
+      - name: Upload Behat debug output
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: behat-debug
+          path: etc/build
+          if-no-files-found: ignore

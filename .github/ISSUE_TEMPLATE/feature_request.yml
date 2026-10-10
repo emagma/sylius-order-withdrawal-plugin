@@ -1,0 +1,107 @@
+name: ✨ Feature request
+description: Propose a change. Issues are how contributions come in, from humans and agents alike.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the proposal. Describe the problem and the change you want: a maintainer
+        validates the approach here, then it gets built.
+
+        The plugin is a **notification and triage tool**, not a returns engine (see
+        [what it does not do](../../blob/main/README.md#what-it-does-not-do)), and a lot is
+        already extensible from your own application (see the
+        [developer guide](../../blob/main/docs/developer-guide.md)).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >-
+        What you are trying to accomplish, and what makes it hard today. Describe the situation,
+        not the solution: it often turns out there is already a way.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The proposal
+      description: >-
+        The behaviour you want, described as something a user or an integrator can observe. A
+        sketch of the approach (which service, event, template or configuration key is involved)
+        is welcome, not required.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in, and what is explicitly out. One concern per issue.
+      placeholder: |
+        In:  …
+        Out: …
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: >-
+        How we will know it works. Concrete scenarios are best: they can become a Behat scenario
+        or a unit test.
+      placeholder: |
+        Given …
+        When …
+        Then …
+    validations:
+      required: true
+
+  - type: dropdown
+    id: line
+    attributes:
+      label: Sylius line
+      description: Which plugin line the change concerns.
+      multiple: true
+      options:
+        - "Sylius 2 (branch main)"
+        - "Sylius 1.14 (branch 1.0.x-dev)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried
+      description: >-
+        The extension points you looked at (an event listener, a notifier, a template override, a
+        redefined workflow) and why they did not cover it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Was an AI agent involved in writing this issue?
+      description: >-
+        Agent-assisted issues are welcome. You own what you post: read it first, and make sure it
+        names real files, services and configuration keys of this repository.
+      options:
+        - "No"
+        - "Yes, and I reviewed it before posting"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: validation
+    attributes:
+      label: Can you help validate it?
+      description: Not a commitment, and not a condition. It just helps with planning.
+      options:
+        - "Yes, I can test the change on my shop"
+        - "Yes, and I can give feedback on the approach before it is built"
+        - "No"
+    validations:
+      required: true

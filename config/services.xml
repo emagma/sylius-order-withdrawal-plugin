@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="emagma_sylius_order_withdrawal.form.type.withdrawal_request.validation_groups" type="collection">
+            <parameter>sylius</parameter>
+        </parameter>
+    </parameters>
+
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="false" />
+
+        <prototype namespace="Emagma\SyliusOrderWithdrawalPlugin\" resource="../src/*"
+                   exclude="../src/{DependencyInjection,Entity,Migrations,Model,Event,EmagmaSyliusOrderWithdrawalPlugin.php,EventListener/WithdrawalRequestRateLimitListener.php}" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Resolver\DefaultRecipientResolver">
+            <argument>%emagma_sylius_order_withdrawal.notification_email%</argument>
+            <argument>%emagma_sylius_order_withdrawal.prefer_channel_contact_email%</argument>
+        </service>
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Resolver\RecipientResolverInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\Resolver\DefaultRecipientResolver" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Resolver\WithdrawalRequestContextResolverInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\Resolver\WithdrawalRequestContextResolver" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailer" public="true">
+            <argument type="service" id="sylius.email_sender" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Resolver\WithdrawalRequestContextResolverInterface" />
+        </service>
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailerInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailer" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Notifier\ChainWithdrawalRequestNotifier" public="true">
+            <argument type="tagged_iterator" tag="emagma_sylius_order_withdrawal.notifier" />
+            <argument type="service" id="logger" on-invalid="null" />
+        </service>
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Notifier\WithdrawalRequestNotifierAggregatorInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\Notifier\ChainWithdrawalRequestNotifier" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Form\Type\WithdrawalRequestType" autowire="false" autoconfigure="false">
+            <argument>%emagma_sylius_order_withdrawal.model.withdrawal_request.class%</argument>
+            <argument>%emagma_sylius_order_withdrawal.form.type.withdrawal_request.validation_groups%</argument>
+            <tag name="form.type" />
+        </service>
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\EventListener\WithdrawalRequestListener">
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailerInterface" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Notifier\WithdrawalRequestNotifierAggregatorInterface" />
+            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="sylius.context.channel" />
+            <argument type="service" id="sylius.context.locale" />
+            <argument>%emagma_sylius_order_withdrawal.send_acknowledgement%</argument>
+            <argument type="service" id="logger" on-invalid="null" />
+            <argument type="service" id="clock" on-invalid="null" />
+        </service>
+    </services>
+
+</container>

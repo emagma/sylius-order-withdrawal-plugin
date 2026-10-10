@@ -1,0 +1,2 @@
+emagma_sylius_order_withdrawal:
+    resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/routes.yaml'

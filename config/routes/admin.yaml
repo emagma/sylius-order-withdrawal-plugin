@@ -1,0 +1,80 @@
+emagma_sylius_order_withdrawal_admin_withdrawal_request:
+    resource: |
+        alias: emagma_sylius_order_withdrawal.withdrawal_request
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        only: ['index']
+        path: withdrawal-requests
+        grid: emagma_sylius_order_withdrawal_withdrawal_request
+        vars:
+            all:
+                subheader: emagma_sylius_order_withdrawal.admin.subheader
+            index:
+                icon: undo
+    type: sylius.resource
+
+emagma_sylius_order_withdrawal_admin_withdrawal_request_show:
+    path: /withdrawal-requests/{id}
+    methods: [GET]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: emagma_sylius_order_withdrawal.controller.withdrawal_request::showAction
+        _sylius:
+            section: admin
+            permission: true
+            template: '@SyliusAdmin/shared/crud/show.html.twig'
+
+emagma_sylius_order_withdrawal_admin_withdrawal_request_start:
+    path: /withdrawal-requests/{id}/start
+    methods: [PUT]
+    defaults:
+        _controller: emagma_sylius_order_withdrawal.controller.withdrawal_request::applyStateMachineTransitionAction
+        _sylius:
+            event: start
+            section: admin
+            permission: true
+            state_machine:
+                graph: emagma_sylius_order_withdrawal_request
+                transition: start
+            redirect:
+                route: emagma_sylius_order_withdrawal_admin_withdrawal_request_show
+                parameters:
+                    id: $id
+            flash: emagma_sylius_order_withdrawal.withdrawal_request.transition_applied
+
+emagma_sylius_order_withdrawal_admin_withdrawal_request_confirm:
+    path: /withdrawal-requests/{id}/confirm
+    methods: [PUT]
+    defaults:
+        _controller: emagma_sylius_order_withdrawal.controller.withdrawal_request::applyStateMachineTransitionAction
+        _sylius:
+            event: confirm
+            section: admin
+            permission: true
+            state_machine:
+                graph: emagma_sylius_order_withdrawal_request
+                transition: confirm
+            redirect:
+                route: emagma_sylius_order_withdrawal_admin_withdrawal_request_show
+                parameters:
+                    id: $id
+            flash: emagma_sylius_order_withdrawal.withdrawal_request.transition_applied
+
+emagma_sylius_order_withdrawal_admin_withdrawal_request_reject:
+    path: /withdrawal-requests/{id}/reject
+    methods: [PUT]
+    defaults:
+        _controller: emagma_sylius_order_withdrawal.controller.withdrawal_request::applyStateMachineTransitionAction
+        _sylius:
+            event: reject
+            section: admin
+            permission: true
+            state_machine:
+                graph: emagma_sylius_order_withdrawal_request
+                transition: reject
+            redirect:
+                route: emagma_sylius_order_withdrawal_admin_withdrawal_request_show
+                parameters:
+                    id: $id
+            flash: emagma_sylius_order_withdrawal.withdrawal_request.transition_applied

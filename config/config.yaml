@@ -1,0 +1,6 @@
+imports:
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/resources.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/mailer.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/workflow/state_machine.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/grids.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/twig_hooks/admin/withdrawal_request/show.yaml' }
