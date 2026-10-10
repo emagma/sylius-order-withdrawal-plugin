@@ -1,0 +1,83 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% set graph = 'emagma_sylius_order_withdrawal_request' %}
+{% set transition_icons = {
+    'start': 'play',
+    'confirm': 'check',
+    'reject': 'times',
+} %}
+
+{% block content %}
+    <div class="ui segment">
+        <h1 class="ui header">
+            {{ 'emagma_sylius_order_withdrawal.admin.show_title'|trans }} #{{ resource.id }}
+            {% include '@EmagmaSyliusOrderWithdrawalPlugin/admin/withdrawal_request/grid/field/state.html.twig' with { data: resource.state } %}
+        </h1>
+
+        <table class="ui definition table">
+            <tbody>
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.full_name'|trans }}</td>
+                    <td>{{ resource.fullName }}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.email'|trans }}</td>
+                    <td>{{ resource.email }}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.order_number'|trans }}</td>
+                    <td>{{ resource.orderNumber }}</td>
+                </tr>
+                {% if resource.channel %}
+                    <tr>
+                        <td>{{ 'sylius.ui.channel'|trans }}</td>
+                        <td>{{ resource.channel.name }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.order_date'|trans }}</td>
+                    <td>{{ resource.orderDate ? resource.orderDate|format_date : '' }}</td>
+                </tr>
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.reception_date'|trans }}</td>
+                    <td>
+                        {%- if resource.notYetReceived -%}
+                            {{ 'emagma_sylius_order_withdrawal.form.not_yet_received'|trans }}
+                        {%- elseif resource.receptionDate -%}
+                            {{ resource.receptionDate|format_date }}
+                        {%- endif -%}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.scope'|trans }}</td>
+                    <td>{{ ('emagma_sylius_order_withdrawal.scope.' ~ resource.scope.value)|trans }}</td>
+                </tr>
+                {% if resource.message %}
+                    <tr>
+                        <td>{{ 'emagma_sylius_order_withdrawal.form.message'|trans }}</td>
+                        <td>{{ resource.message|nl2br }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>{{ 'emagma_sylius_order_withdrawal.form.submitted_at'|trans }}</td>
+                    <td>{{ resource.submittedAt ? resource.submittedAt|format_datetime : '' }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="ui buttons">
+            {% for transition in ['start', 'confirm', 'reject'] %}
+                {% if sylius_sm_can(resource, graph, transition) %}
+                    <form action="{{ path('emagma_sylius_order_withdrawal_admin_withdrawal_request_' ~ transition, {'id': resource.id}) }}" method="post" novalidate>
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token(resource.id) }}" />
+                        <input type="hidden" name="_method" value="PUT" />
+                        <button type="submit" id="emagma-withdrawal-transition-{{ transition }}" class="ui labeled icon button">
+                            <i class="{{ transition_icons[transition] }} icon" aria-hidden="true"></i>
+                            {{ ('emagma_sylius_order_withdrawal.transition.' ~ transition)|trans }}
+                        </button>
+                    </form>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

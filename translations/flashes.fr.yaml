@@ -1,0 +1,4 @@
+emagma_sylius_order_withdrawal:
+    withdrawal_request:
+        create: "Votre demande de rétractation a bien été envoyée. Vous allez recevoir un accusé de réception par e-mail."
+        transition_applied: "Le statut de la demande de rétractation a été mis à jour."

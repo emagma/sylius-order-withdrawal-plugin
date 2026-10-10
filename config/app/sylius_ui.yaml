@@ -1,0 +1,9 @@
+sylius_ui:
+    events:
+        # Inject a "Withdrawal request" column into the shop footer grid without
+        # overriding any core template. Sits just after the "Customer care" column.
+        sylius.shop.layout.footer.grid:
+            blocks:
+                emagma_withdrawal_request:
+                    template: '@EmagmaSyliusOrderWithdrawalPlugin/shop/footer/_withdrawal_request.html.twig'
+                    priority: 15

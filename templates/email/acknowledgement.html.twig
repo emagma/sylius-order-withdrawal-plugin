@@ -1,0 +1,15 @@
+{% extends '@SyliusShop/Email/layout.html.twig' %}
+
+{% block subject %}{% autoescape false %}{{ 'emagma_sylius_order_withdrawal.email.acknowledgement.subject'|trans({}, null, localeCode) }}{% endautoescape %}{% endblock %}
+
+{% block content %}
+    <p>{{ 'emagma_sylius_order_withdrawal.email.greeting'|trans({'%name%': withdrawalRequest.fullName}, null, localeCode) }}</p>
+    <p>{{ 'emagma_sylius_order_withdrawal.email.acknowledgement.intro'|trans({}, null, localeCode) }}</p>
+    <ul>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.order_number'|trans({}, null, localeCode) }}: {{ withdrawalRequest.orderNumber }}</li>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.order_date'|trans({}, null, localeCode) }}: {{ withdrawalRequest.orderDate|format_date(locale: localeCode) }}</li>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.scope'|trans({}, null, localeCode) }}: {{ withdrawalRequest.scope|trans({}, null, localeCode) }}</li>
+        <li>{{ 'emagma_sylius_order_withdrawal.email.submitted_at'|trans({}, null, localeCode) }}: {{ withdrawalRequest.submittedAt|format_datetime(locale: localeCode) }}</li>
+    </ul>
+    <p>{{ 'emagma_sylius_order_withdrawal.email.acknowledgement.followup'|trans({}, null, localeCode) }}</p>
+{% endblock %}

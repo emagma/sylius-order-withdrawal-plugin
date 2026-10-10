@@ -1,0 +1,31 @@
+parameters:
+    level: max
+    reportUnmatchedIgnoredErrors: false
+
+    # The whole span this line supports, not just the floor: PHPStan reports anything broken on
+    # *any* PHP in the range, so syntax newer than the floor (readonly classes, constants in
+    # traits, DNF types) fails against min, and an 8.3 deprecation fails against max.
+    #
+    # Declaring it is load-bearing, not decoration. PHPStan follows the PHP it runs under and
+    # infers only `config.platform.php` from composer.json — which this package does not set — so
+    # without this a contributor on 8.3 and CI's floor job would analyse two different languages.
+    #
+    # Keep max in step with the CI matrix in .github/workflows/ci.yml.
+    phpVersion:
+        min: 80100
+        max: 80399
+
+    paths:
+        - 'src/'
+
+    excludePaths:
+        - 'src/Migrations/*'
+
+    ignoreErrors:
+        - identifier: missingType.generics
+        - identifier: missingType.iterableValue
+
+includes:
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-webmozart-assert/extension.neon

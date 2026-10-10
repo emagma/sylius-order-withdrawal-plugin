@@ -1,0 +1,160 @@
+# Applies the shipped migrations on every platform the plugin claims, and checks the resulting
+# schema still matches the entity mapping. No other workflow runs a migration at all — behat.yml
+# builds its schema with doctrine:schema:create.
+#
+# The migrations come in platform-guarded pairs, so a column added to only one half fails
+# nowhere: the run on the other platform skips that half and reports success. The drift check
+# below is what turns that into a red build.
+name: Migrations
+
+# This branch only, like its siblings: `main` (the Sylius 2.x line) carries its own copies of
+# these workflows, with their own PHP floor and dependency flags.
+on:
+  push:
+    branches:
+      - "1.0.x-dev"
+  pull_request: ~
+  workflow_dispatch: ~
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COMPOSER_MEMORY_LIMIT: -1
+  # The floor from composer.json — the migrations run on the oldest PHP consumers may use.
+  PHP_MINIMUM: "8.1"
+
+jobs:
+  migrate:
+    name: "Migrations · ${{ matrix.platform }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: MySQL
+            database_url: "mysql://root@127.0.0.1:3306/sylius_test?serverVersion=8.0"
+          - platform: MariaDB
+            database_url: "mysql://root@127.0.0.1:3307/sylius_test?serverVersion=mariadb-11.4.0"
+          # charset=utf8 is load-bearing. tests/TestApplication/config/config.yaml pins
+          # doctrine.dbal.charset to utf8mb4 so the MySQL harness exercises 4-byte characters;
+          # handed to PostgreSQL that is an invalid client_encoding and the connection dies. A
+          # charset in the URL overrides the configured one.
+          - platform: PostgreSQL
+            database_url: "postgresql://postgres:postgres@127.0.0.1:5432/sylius_test?serverVersion=16&charset=utf8"
+
+    # All three servers start for every leg — GitHub Actions cannot attach a service
+    # conditionally — and each leg connects to just the one its DATABASE_URL names. MySQL and
+    # MariaDB both listen on 3306 inside their container, so MariaDB is published on 3307.
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sylius_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: ${{ matrix.database_url }}
+      SYLIUS_TEST_APP_BUNDLES_PATH: tests/TestApplication/bundles.php
+      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml"
+      SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_MINIMUM }}
+          extensions: intl, gd, zip, bcmath, exif, pdo_mysql, pdo_pgsql
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        # --no-security-blocking: the 1.14 dependency tree pins packages that carry open
+        # advisories and cannot be bumped without leaving the line.
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts --no-security-blocking
+
+      - name: Create database
+        run: vendor/bin/console doctrine:database:create --if-not-exists --no-interaction
+
+      # The whole chain, core's migrations included, exactly as a host application runs it.
+      - name: Migrate
+        run: vendor/bin/console doctrine:migrations:migrate --no-interaction
+
+      # The real assertion: anything schema:update still wants to do to the plugin's table means
+      # this platform's migration is out of step with the entity. Catches both a drifted table
+      # (ALTER) and one no migration created because both halves skipped (CREATE). Filtered to
+      # the plugin's table, since the test app carries core and Messenger tables too — so the
+      # grep must grow if the plugin ever adds a second table.
+      - name: Check the migrated schema matches the mapping
+        run: |
+          DRIFT=$(vendor/bin/console doctrine:schema:update --dump-sql 2>/dev/null \
+            | grep -i 'emagma_order_withdrawal_request' || true)
+
+          if [ -n "$DRIFT" ]; then
+            echo "::error::The ${{ matrix.platform }} migration is out of step with the entity mapping."
+            echo "Doctrine still wants to run the following against emagma_order_withdrawal_request:"
+            echo "$DRIFT"
+            echo
+            echo "Update BOTH migrations — Version20260720160024 (MySQL/MariaDB) and"
+            echo "Version20260720160025 (PostgreSQL) — see docs/developer-guide.md#database-migrations."
+            exit 1
+          fi
+
+          echo "Schema matches the mapping on ${{ matrix.platform }}."
+
+      # Both versions are named unconditionally: whichever was skipped on this platform skips its
+      # down() too.
+      - name: Roll the plugin migrations back
+        run: vendor/bin/console doctrine:migrations:execute --down --no-interaction
+          'Emagma\SyliusOrderWithdrawalPlugin\Migrations\Version20260720160024'
+          'Emagma\SyliusOrderWithdrawalPlugin\Migrations\Version20260720160025'
+
+      # down() exiting zero proves nothing; Doctrine wanting to CREATE the table again does. A
+      # leftover table, or one still carrying orphaned indexes, produces no CREATE and fails here.
+      - name: Check the rollback removed the table
+        run: |
+          RECREATE=$(vendor/bin/console doctrine:schema:update --dump-sql 2>/dev/null \
+            | grep -ci 'CREATE TABLE emagma_order_withdrawal_request' || true)
+
+          if [ "$RECREATE" -eq 0 ]; then
+            echo "::error::down() did not remove emagma_order_withdrawal_request on ${{ matrix.platform }}."
+            exit 1
+          fi
+
+          echo "Rollback removed the table cleanly on ${{ matrix.platform }}."

@@ -1,0 +1,6 @@
+imports:
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/resources.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/mailer.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/sylius_ui.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/state_machine.yaml' }
+    - { resource: '@EmagmaSyliusOrderWithdrawalPlugin/config/app/grids.yaml' }

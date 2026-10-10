@@ -1,0 +1,55 @@
+emagma_sylius_order_withdrawal:
+    ui:
+        withdrawal_requests: 'Demandes de rétractation'
+        withdrawal_request: 'Demande de rétractation'
+    shop:
+        title: 'Demande de rétractation'
+        intro: "Vous disposez d'un délai de 14 jours à compter de la réception du produit pour exercer votre droit de rétractation. Remplissez le formulaire ci-dessous pour en informer notre Service Client qui fera suite à votre demande. Pour plus d'informations, merci de consulter nos Conditions Générales de Vente."
+        cta: 'Confirmer la demande de rétractation'
+        footer_link: 'Demande de rétractation'
+        submit_notice: "L'envoi de ce formulaire enregistre votre demande de rétractation et déclenche l'envoi d'un accusé de réception à votre adresse e-mail."
+    form:
+        first_name: 'Prénom'
+        last_name: 'Nom'
+        full_name: 'Nom et prénom'
+        order_number: 'Numéro de commande concernée'
+        order_date: 'Date de la commande'
+        not_yet_received: 'Commande pas encore reçue'
+        reception_date: 'Date de réception de la commande (facultatif)'
+        email: 'Adresse e-mail'
+        scope: 'Ma rétractation porte sur'
+        message: 'Précisions (facultatif)'
+        partial_detail_required: 'Merci de préciser les articles concernés par votre rétractation partielle.'
+        state: 'Statut'
+        submitted_at: 'Date et heure de la demande'
+        legal_notice: "Je vous notifie par la présente renoncer au contrat portant sur la commande identifiée ci-dessus et je m'engage à retourner la commande à mes frais."
+        legal_notice_required: 'Vous devez accepter la mention de rétractation pour continuer.'
+    scope:
+        full: 'la totalité de ma commande'
+        partial: 'une partie de ma commande'
+    state:
+        new: 'Nouvelle'
+        in_progress: 'En cours de traitement'
+        confirmed: 'Confirmée'
+        rejected: 'Refusée'
+    transition:
+        start: 'Prendre en charge'
+        confirm: 'Confirmer la rétractation'
+        reject: 'Refuser'
+    admin:
+        menu: 'Demandes de rétractation'
+        subheader: 'Gérer les demandes de rétractation des clients'
+        show_title: 'Demande de rétractation'
+    email:
+        greeting: 'Bonjour %name%,'
+        submitted_at: 'Date et heure de la demande'
+        acknowledgement:
+            subject: 'Accusé de réception de votre demande de rétractation'
+            intro: 'Nous accusons réception de votre demande de rétractation portant sur les éléments suivants :'
+            followup: "Une confirmation d'annulation vous sera adressée ultérieurement après traitement par notre Service Client."
+        notification:
+            subject: 'Nouvelle demande de rétractation — commande %order%'
+            intro: 'Une nouvelle demande de rétractation a été soumise :'
+        confirmation:
+            subject: 'Confirmation de votre rétractation'
+            body: 'Votre rétractation portant sur la commande %order% a bien été prise en compte.'

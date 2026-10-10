@@ -1,0 +1,15 @@
+{# Override of @SyliusUi/Form/theme.html.twig `choice_row`: the Sylius theme adds the
+   Semantic UI `ui dropdown` class to every choice widget, which is only correct for a
+   collapsed <select>. On an expanded choice (radios/checkboxes) it mislays the grouped
+   fields, so only add it when the field is actually collapsed. #}
+{% block choice_row -%}
+    <div class="{% if required %}required {% endif %}field{% if (not compound or force_error|default(false)) and not valid %} error{% endif %}">
+        {{- form_label(form) -}}
+        {% if not expanded %}
+            {% set attr = attr|merge({'class': attr.class|default ~ ' ui dropdown'}) %}
+        {% endif %}
+        {{- form_widget(form, {'attr': attr}) -}}
+        {{- form_help(form) -}}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock choice_row %}

@@ -1,0 +1,11 @@
+emagma_sylius_order_withdrawal_shop_request:
+    path: /withdrawal-request
+    methods: [GET, POST]
+    defaults:
+        _controller: emagma_sylius_order_withdrawal.controller.withdrawal_request::createAction
+        _sylius:
+            form: Emagma\SyliusOrderWithdrawalPlugin\Form\Type\WithdrawalRequestType
+            template: '@EmagmaSyliusOrderWithdrawalPlugin/shop/withdrawal_request/request.html.twig'
+            redirect:
+                route: emagma_sylius_order_withdrawal_shop_request
+                parameters: []

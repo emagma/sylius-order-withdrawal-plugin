@@ -1,0 +1,17 @@
+{% extends '@SyliusShop/Email/layout.html.twig' %}
+
+{% block subject %}{% autoescape false %}{{ 'emagma_sylius_order_withdrawal.email.notification.subject'|trans({'%order%': withdrawalRequest.orderNumber}, null, localeCode) }}{% endautoescape %}{% endblock %}
+
+{% block content %}
+    <p>{{ 'emagma_sylius_order_withdrawal.email.notification.intro'|trans({}, null, localeCode) }}</p>
+    <ul>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.full_name'|trans({}, null, localeCode) }}: {{ withdrawalRequest.fullName }}</li>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.email'|trans({}, null, localeCode) }}: {{ withdrawalRequest.email }}</li>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.order_number'|trans({}, null, localeCode) }}: {{ withdrawalRequest.orderNumber }}</li>
+        <li>{{ 'emagma_sylius_order_withdrawal.form.order_date'|trans({}, null, localeCode) }}: {{ withdrawalRequest.orderDate|format_date(locale: localeCode) }}</li>
+        {% if withdrawalRequest.notYetReceived %}<li>{{ 'emagma_sylius_order_withdrawal.form.not_yet_received'|trans({}, null, localeCode) }}</li>{% elseif withdrawalRequest.receptionDate %}<li>{{ 'emagma_sylius_order_withdrawal.form.reception_date'|trans({}, null, localeCode) }}: {{ withdrawalRequest.receptionDate|format_date(locale: localeCode) }}</li>{% endif %}
+        <li>{{ 'emagma_sylius_order_withdrawal.form.scope'|trans({}, null, localeCode) }}: {{ withdrawalRequest.scope|trans({}, null, localeCode) }}</li>
+        {% if withdrawalRequest.message %}<li>{{ 'emagma_sylius_order_withdrawal.form.message'|trans({}, null, localeCode) }}: {{ withdrawalRequest.message }}</li>{% endif %}
+        <li>{{ 'emagma_sylius_order_withdrawal.email.submitted_at'|trans({}, null, localeCode) }}: {{ withdrawalRequest.submittedAt|format_datetime(locale: localeCode) }}</li>
+    </ul>
+{% endblock %}

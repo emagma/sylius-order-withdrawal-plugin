@@ -1,0 +1,7 @@
+{% set labels = {
+    'new': 'grey',
+    'in_progress': 'blue',
+    'confirmed': 'green',
+    'rejected': 'red',
+} %}
+<span class="ui {{ labels[data]|default('grey') }} label">{{ ('emagma_sylius_order_withdrawal.state.' ~ data)|trans }}</span>

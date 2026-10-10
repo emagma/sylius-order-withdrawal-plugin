@@ -1,0 +1,5 @@
+# Default owners for everything in this repository.
+# TODO(release): replace with the real GitHub org/team handle before making the repo public —
+# an unresolvable owner silently disables review requests rather than failing loudly.
+
+* @emagma/maintainers

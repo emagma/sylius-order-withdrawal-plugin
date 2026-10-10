@@ -1,0 +1,107 @@
+# Coding standard, static analysis and unit tests. Acceptance suites live in behat.yml.
+# No composer.lock is committed, so every job resolves with `composer update`.
+name: CI
+
+on:
+  push:
+    branches:
+      - "1.0.x-dev"
+  pull_request: ~
+  workflow_dispatch: ~
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COMPOSER_MEMORY_LIMIT: -1
+  PHP_EXTENSIONS: intl, gd, zip, bcmath, exif, pdo_mysql
+  # The floor from composer.json (`php: ^8.1`). The single-version jobs below run on it rather
+  # than on the newest PHP, so syntax that only parses on a later version (8.2 readonly classes,
+  # constants in traits, DNF types) fails here instead of reaching a consumer on 8.1.
+  PHP_MINIMUM: "8.1"
+
+jobs:
+  coding-standard:
+    name: Coding standard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_MINIMUM }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        # --no-security-blocking: the 1.14 dependency tree pins packages that carry open
+        # advisories and cannot be bumped without leaving the line.
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts --no-security-blocking
+
+      - name: Check coding standard
+        run: vendor/bin/ecs check
+
+  static-analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_MINIMUM }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        # --no-security-blocking: the 1.14 dependency tree pins packages that carry open
+        # advisories and cannot be bumped without leaving the line.
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts --no-security-blocking
+
+      - name: Analyse
+        run: vendor/bin/phpstan analyse --no-progress
+
+  # Three axes, every value of each covered at least once:
+  #   Sylius   1.14           the only line this branch targets  (composer.json: ^1.14.0)
+  #   Symfony  6.4            the only line this branch targets  (composer.json: ^6.4)
+  #   PHP      8.1, 8.2, 8.3  every version allowed              (composer.json: ^8.1)
+  # Sylius 1.14 also installs on Symfony 5.4, but this branch deliberately requires ^6.4 only —
+  # 5.4 is EOL, so nothing here is tested or supported against it.
+  tests:
+    name: "Sylius ${{ matrix.sylius }} · Symfony ${{ matrix.symfony }} · PHP ${{ matrix.php }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { sylius: "1.14.*", symfony: "6.4.*", php: "8.1" }
+          - { sylius: "1.14.*", symfony: "6.4.*", php: "8.2" }
+          - { sylius: "1.14.*", symfony: "6.4.*", php: "8.3" }
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+          tools: composer:v2
+
+      - name: Select Sylius ${{ matrix.sylius }} and Symfony ${{ matrix.symfony }}
+        run: |
+          composer require sylius/sylius:"${{ matrix.sylius }}" --no-update --no-interaction
+          composer config extra.symfony.require "${{ matrix.symfony }}"
+
+      - name: Install dependencies
+        # --no-security-blocking: the 1.14 dependency tree pins packages that carry open
+        # advisories and cannot be bumped without leaving the line.
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts --no-security-blocking
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --colors=always

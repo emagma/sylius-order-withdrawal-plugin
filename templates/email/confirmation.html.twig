@@ -1,0 +1,8 @@
+{% extends '@SyliusShop/Email/layout.html.twig' %}
+
+{% block subject %}{% autoescape false %}{{ 'emagma_sylius_order_withdrawal.email.confirmation.subject'|trans({}, null, localeCode) }}{% endautoescape %}{% endblock %}
+
+{% block content %}
+    <p>{{ 'emagma_sylius_order_withdrawal.email.greeting'|trans({'%name%': withdrawalRequest.fullName}, null, localeCode) }}</p>
+    <p>{{ 'emagma_sylius_order_withdrawal.email.confirmation.body'|trans({'%order%': withdrawalRequest.orderNumber}, null, localeCode) }}</p>
+{% endblock %}

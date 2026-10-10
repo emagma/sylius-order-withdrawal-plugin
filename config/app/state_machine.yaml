@@ -1,0 +1,25 @@
+winzou_state_machine:
+    emagma_sylius_order_withdrawal_request:
+        class: '%emagma_sylius_order_withdrawal.model.withdrawal_request.class%'
+        property_path: state
+        graph: emagma_sylius_order_withdrawal_request
+        state_machine_class: '%sylius.state_machine.class%'
+        states:
+            new: ~
+            in_progress: ~
+            confirmed: ~
+            rejected: ~
+        transitions:
+            start:
+                from: [new]
+                to: in_progress
+            confirm:
+                from: [new, in_progress]
+                to: confirmed
+            reject:
+                from: [new, in_progress]
+                to: rejected
+
+# No `callbacks` here on purpose. The timestamp and the confirmation email hang off winzou's
+# POST_TRANSITION event in WithdrawalRequestListener instead, so redeclaring this graph in a host
+# application — to add a state or a transition — cannot silently drop them.

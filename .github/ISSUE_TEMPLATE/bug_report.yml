@@ -1,0 +1,110 @@
+name: 🐛 Bug report
+description: Something in the plugin behaves incorrectly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For installation help or integration questions, the
+        [Sylius Slack](https://sylius.com/slack) is usually faster.
+
+        A precise, reproducible report is the most useful contribution: a maintainer confirms it
+        here, then the fix follows.
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      placeholder: "2.0.1, or the branch and commit you're on"
+    validations:
+      required: true
+
+  - type: input
+    id: sylius-version
+    attributes:
+      label: Sylius version
+      description: "Output of `composer show sylius/sylius | grep versions`"
+      placeholder: "v2.1.3 or v1.14.6"
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: "8.3.14"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: What you observed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: >-
+        The correct behaviour. Once the bug is fixed, this is what we check: be as concrete as
+        you can.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        Specific enough that a maintainer can follow them on a fresh Sylius install, or on the
+        demo image (`docker/demo/`). The more reproducible the report, the sooner it gets fixed.
+      placeholder: |
+        1. Install the plugin on a fresh Sylius shop
+        2. Go to /en_US/withdrawal-request
+        3. Submit the form with …
+        4. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error output
+      description: Stack trace, `var/log/*.log` excerpt, or browser console output. Pasted as text, not a screenshot.
+      render: shell
+
+  - type: textarea
+    id: customisations
+    attributes:
+      label: Relevant customisations
+      description: >-
+        Overridden templates, a custom notifier, a redefined workflow, a modified form, a custom
+        theme: anything of yours that touches the plugin. "None" is a perfectly good answer, and a
+        useful one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: cause
+    attributes:
+      label: Suspected cause or fix
+      description: >-
+        Optional. If you found where it goes wrong, point to the file and line and describe the fix
+        you have in mind. Describe it rather than pasting a patch: the fix is implemented once the
+        approach is agreed.
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Was an AI agent involved in writing this issue?
+      description: >-
+        Agent-assisted reports are welcome. You own what you post: read it first, and make sure the
+        versions, steps and output are the ones you actually observed.
+      options:
+        - "No"
+        - "Yes, and I reviewed it before posting"
+    validations:
+      required: true

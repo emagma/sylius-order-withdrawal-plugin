@@ -1,0 +1,15 @@
+# Plain-HTTP single-port server for the demo image. No TLS, no auto-https:
+# the image is reached at http://localhost:<published-port>, so certificates would
+# only get in the way (and the host:port rarely matches any channel hostname anyway).
+{
+	frankenphp
+	auto_https off
+	admin off
+	persist_config off
+}
+
+:80 {
+	root * /app/vendor/sylius/test-application/public
+	encode zstd gzip
+	php_server
+}
