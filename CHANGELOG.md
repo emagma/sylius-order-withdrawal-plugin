@@ -10,6 +10,11 @@ line — see [Branching](CONTRIBUTING.md#branching).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-12
+
+No change to the shipped code. A new test covers `notification_email` from the configuration to
+the recipient resolver, including an unset or empty environment variable.
+
 ## [1.0.0] - 2026-10-10
 
 First public release of the plugin's 1.x line, targeting Sylius `^1.14.0`. Feature-equivalent to
