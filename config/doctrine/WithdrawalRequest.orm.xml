@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine.apache.org/schemas/orm/doctrine-mapping
                   https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest"
-            table="emagma_order_withdrawal_request">
+    <mapped-superclass name="Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest"
+                       table="emagma_order_withdrawal_request">
         <indexes>
             <index name="IDX_emagma_withdrawal_state_submitted_at" columns="state,submitted_at"/>
         </indexes>
@@ -32,6 +32,6 @@
         <many-to-one field="channel" target-entity="Sylius\Component\Channel\Model\ChannelInterface">
             <join-column name="channel_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
         </many-to-one>
-    </entity>
+    </mapped-superclass>
 
 </doctrine-mapping>

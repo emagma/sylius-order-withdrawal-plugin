@@ -140,6 +140,13 @@ MySQL/MariaDB and one for PostgreSQL. CI applies both on all three platforms and
 falls out of step with the mapping, so a PR that updates only one half will go red. See
 [Database migrations](docs/developer-guide.md#database-migrations).
 
+The test application can run on a subclass of `WithdrawalRequest`
+(`tests/TestApplication/src/Entity/`, with its own migration in `tests/TestApplication/migrations/`),
+enabled by appending `tests/TestApplication/config/extended_entity.yaml` to
+`SYLIUS_TEST_APP_CONFIGS_TO_IMPORT`. The local `.env` files and the Behat workflow run with it; the
+migrations workflow runs every platform both with it (`extended`) and without it (`plugin`). A
+mapping change must pass in both modes.
+
 ## What a good pull request looks like
 
 - **A link to the issue it implements** (`Closes #123`). No issue, no pull request: the approach

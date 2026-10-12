@@ -1,0 +1,28 @@
+# Runs the harness on a host-side subclass of WithdrawalRequest. Opt-in, appended to
+# SYLIUS_TEST_APP_CONFIGS_TO_IMPORT, so CI covers both the override and the default mapping. The
+# four blocks go together: the subclass mapping loaded without the model override puts two entities
+# on one table.
+sylius_resource:
+    resources:
+        emagma_sylius_order_withdrawal.withdrawal_request:
+            classes:
+                model: Tests\Emagma\SyliusOrderWithdrawalPlugin\TestApplication\Entity\WithdrawalRequest
+
+doctrine:
+    orm:
+        mappings:
+            TestApplication:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/../../../tests/TestApplication/src/Entity'
+                prefix: 'Tests\Emagma\SyliusOrderWithdrawalPlugin\TestApplication\Entity'
+                alias: TestApplication
+
+doctrine_migrations:
+    migrations_paths:
+        'Tests\Emagma\SyliusOrderWithdrawalPlugin\TestApplication\Migrations': '%kernel.project_dir%/../../../tests/TestApplication/migrations'
+
+sylius_labs_doctrine_migrations_extra:
+    migrations:
+        'Tests\Emagma\SyliusOrderWithdrawalPlugin\TestApplication\Migrations':
+            - 'Emagma\SyliusOrderWithdrawalPlugin\Migrations'

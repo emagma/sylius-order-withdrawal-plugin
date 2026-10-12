@@ -477,8 +477,9 @@ Returning an empty array suppresses the notification.
 
 ### Extending the entity
 
-`WithdrawalRequest` is non-`final` with `protected` properties, so it supports subclassing. The
-resource class is a container parameter you can swap:
+`WithdrawalRequest` is mapped as a Doctrine `<mapped-superclass>`: Sylius turns it into an entity
+only while it is the configured resource model. Point the model at your own subclass and the
+subclass owns the table instead:
 
 ```yaml
 sylius_resource:
@@ -488,13 +489,27 @@ sylius_resource:
                 model: App\Entity\WithdrawalRequest
 ```
 
-However, the plugin maps its concrete class as a Doctrine `<entity>` (not a mapped superclass)
-and ships no interface. A subclass mapped to the same table gives Doctrine two entities for one
-table — making this work means neutralising the plugin's mapping, which is fragile.
+```php
+namespace App\Entity;
 
-**Prefer a side table:** create your own entity with a `many-to-one` to `WithdrawalRequest`,
-populated from a `WithdrawalRequestSubmitted` listener. Your data, your migration, no conflict,
-survives plugin upgrades.
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest as BaseWithdrawalRequest;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'emagma_order_withdrawal_request')]
+class WithdrawalRequest extends BaseWithdrawalRequest
+{
+    #[ORM\Column(name: 'internal_note', type: Types::TEXT, nullable: true)]
+    protected ?string $internalNote = null;
+}
+```
+
+- **Declare the table name.** Doctrine does not inherit it from a mapped superclass (the indexes
+  are inherited).
+- **Ship your own migration** for the columns you add, ordered after the plugin's.
+- The grid, the form, the routes and the state machine all go through the resource parameter or
+  an `instanceof` check, so they pick the subclass up with no further change.
 
 If you only need extra input to reach a human, add an unmapped form field and append it to the
 notification email.
