@@ -27,13 +27,19 @@ env:
 
 jobs:
   migrate:
-    name: "Migrations · ${{ matrix.platform }}"
+    name: "Migrations · ${{ matrix.platform }} · ${{ matrix.model }}"
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
+        platform: [MySQL, MariaDB, PostgreSQL]
+        # plugin: the plugin class remapped as the entity, as most host applications run it.
+        # extended: a host-side subclass owning the table (tests/TestApplication/config/extended_entity.yaml).
+        model: [plugin, extended]
         include:
+          - model: extended
+            extra_configs: ";@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/extended_entity.yaml"
           - platform: MySQL
             database_url: "mysql://root@127.0.0.1:3306/sylius_test?serverVersion=8.0"
           - platform: MariaDB
@@ -91,7 +97,7 @@ jobs:
       APP_ENV: test
       DATABASE_URL: ${{ matrix.database_url }}
       SYLIUS_TEST_APP_BUNDLES_PATH: tests/TestApplication/bundles.php
-      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml"
+      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml${{ matrix.extra_configs }}"
       SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
 
     steps:
@@ -129,8 +135,14 @@ jobs:
             echo "Doctrine still wants to run the following against emagma_order_withdrawal_request:"
             echo "$DRIFT"
             echo
-            echo "Update BOTH migrations — Version20260720160024 (MySQL/MariaDB) and"
-            echo "Version20260720160025 (PostgreSQL) — see docs/developer-guide.md#database-migrations."
+            if [ "${{ matrix.model }}" = "extended" ]; then
+              echo "This leg also applies the test application's migration (tests/TestApplication/migrations/)."
+              echo "If the matching \"plugin\" leg passes, that migration is the one out of step with"
+              echo "tests/TestApplication/src/Entity/WithdrawalRequest.php — not the plugin's."
+            else
+              echo "Update BOTH migrations — Version20260720160024 (MySQL/MariaDB) and"
+              echo "Version20260720160025 (PostgreSQL) — see docs/developer-guide.md#database-migrations."
+            fi
             exit 1
           fi
 

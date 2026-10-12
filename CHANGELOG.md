@@ -10,6 +10,14 @@ separately — see [Branching](CONTRIBUTING.md#branching).
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-10-12
+
+### Fixed
+
+- `WithdrawalRequest` can be extended by overriding the resource model, as the developer guide
+  documents. It is now mapped as a Doctrine mapped superclass; without an override it stays an
+  entity on the same table, so no migration is needed.
+
 ## [2.0.1] - 2026-10-12
 
 No change to the shipped code. A new test covers `notification_email` from the configuration to

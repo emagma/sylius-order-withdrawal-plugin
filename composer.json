@@ -53,6 +53,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Tests\\Emagma\\SyliusOrderWithdrawalPlugin\\TestApplication\\": "tests/TestApplication/src/",
             "Tests\\Emagma\\SyliusOrderWithdrawalPlugin\\Unit\\": "tests/Unit/"
         }
     },

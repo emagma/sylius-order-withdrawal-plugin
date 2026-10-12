@@ -43,7 +43,7 @@ jobs:
       APP_ENV: test
       DATABASE_URL: "mysql://root@127.0.0.1:3306/sylius_test"
       SYLIUS_TEST_APP_BUNDLES_PATH: tests/TestApplication/bundles.php
-      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml"
+      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml;@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/extended_entity.yaml"
       SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
 
     steps:
