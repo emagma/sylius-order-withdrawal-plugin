@@ -93,6 +93,15 @@ final class EmagmaSyliusOrderWithdrawalExtensionTest extends TestCase
         self::assertFalse($container->getParameter('emagma_sylius_order_withdrawal.send_acknowledgement'));
     }
 
+    public function testTheNotificationEmailParameterIsNullWhenUnset(): void
+    {
+        $container = new ContainerBuilder();
+
+        (new EmagmaSyliusOrderWithdrawalExtension())->load([[]], $container);
+
+        self::assertNull($container->getParameter('emagma_sylius_order_withdrawal.notification_email'));
+    }
+
     public function testItRegistersTheDoctrineXmlMapping(): void
     {
         $container = new ContainerBuilder();

@@ -10,6 +10,11 @@ separately — see [Branching](CONTRIBUTING.md#branching).
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-10-12
+
+No change to the shipped code. A new test covers `notification_email` from the configuration to
+the recipient resolver, including an unset or empty environment variable.
+
 ## [2.0.0] - 2026-10-10
 
 First public release, targeting Sylius `~2.0.0 || ~2.1.0 || ~2.2.0`.
