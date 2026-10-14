@@ -8,7 +8,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 `main` covers the whole Sylius 2.x line; the `1.0.x-dev` branch (Sylius `^1.14.0`) is maintained
 separately — see [Branching](CONTRIBUTING.md#branching).
 
-## [Unreleased]
+## [2.1.0] - 2026-10-14
 
 ### Added
 
