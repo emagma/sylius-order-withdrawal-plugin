@@ -138,8 +138,8 @@ writing, and does not get lost.
 | | Version |
 | --- | --- |
 | PHP | `^8.2` |
-| Sylius | `~2.0.0 \|\| ~2.1.0 \|\| ~2.2.0` |
-| Symfony | `7.4` (or `6.4`) |
+| Sylius | `~2.0.0 \|\| ~2.1.0 \|\| ~2.2.0 \|\| ~2.3.0` |
+| Symfony | `7.4` (or `6.4`; `8.0` on Sylius 2.3 with PHP 8.4+) |
 | Database | MySQL / MariaDB / PostgreSQL — the same platforms Sylius core supports. Two migrations ship, one per platform, each skipping on the other. |
 | DB connection charset | **MySQL/MariaDB only:** `utf8mb4` — a `utf8`/`utf8mb3` DBAL connection will reject 4-byte characters (emoji, many CJK) even though the plugin's own table is `utf8mb4`. PostgreSQL databases are UTF-8 throughout, so nothing to configure. |
 

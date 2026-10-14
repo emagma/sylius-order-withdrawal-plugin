@@ -18,7 +18,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 final class EmagmaSyliusOrderWithdrawalExtension extends Extension implements PrependExtensionInterface
@@ -47,12 +47,12 @@ final class EmagmaSyliusOrderWithdrawalExtension extends Extension implements Pr
         $container->setParameter('emagma_sylius_order_withdrawal.prefer_channel_contact_email', $config['prefer_channel_contact_email']);
         $container->setParameter('emagma_sylius_order_withdrawal.send_acknowledgement', $config['send_acknowledgement']);
 
-        $loader = new XmlFileLoader(
+        $loader = new PhpFileLoader(
             $container,
             new FileLocator(__DIR__ . '/../../config'),
         );
 
-        $loader->load('services.xml');
+        $loader->load('services.php');
 
         $limiterService = $config['rate_limiter_service'];
 
@@ -71,7 +71,7 @@ final class EmagmaSyliusOrderWithdrawalExtension extends Extension implements Pr
             $limiterService,
         );
 
-        $loader->load('services/rate_limiter.xml');
+        $loader->load('services/rate_limiter.php');
     }
 
     public function prepend(ContainerBuilder $container): void

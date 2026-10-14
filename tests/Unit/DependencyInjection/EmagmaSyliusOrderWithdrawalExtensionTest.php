@@ -61,7 +61,7 @@ final class EmagmaSyliusOrderWithdrawalExtensionTest extends TestCase
         self::assertTrue($container->hasDefinition(WithdrawalRequestRateLimitListener::class));
         self::assertFalse(
             $container->getDefinition(WithdrawalRequestRateLimitListener::class)->hasTag('container.excluded'),
-            'The wired listener must be the real service.xml definition, not the leftover prototype stub.',
+            'The wired listener must be the real services/rate_limiter.php definition, not the leftover prototype stub.',
         );
         self::assertSame('limiter.withdrawal', (string) $container->getAlias(self::LIMITER_FACTORY_ID));
     }

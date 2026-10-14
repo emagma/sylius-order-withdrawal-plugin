@@ -10,6 +10,22 @@ separately — see [Branching](CONTRIBUTING.md#branching).
 
 ## [Unreleased]
 
+### Added
+
+- Sylius 2.3 support, on Symfony 6.4, 7.4 and 8.0 (Symfony 8 needs PHP 8.4).
+
+### Changed
+
+- The service definitions moved from `config/services.xml` and `config/services/rate_limiter.xml`
+  to `config/services.php` and `config/services/rate_limiter.php`, because Symfony 8 can no longer
+  load XML service configuration. The extension loads them as before, and they define exactly the
+  same services, so an existing install needs no change.
+
+### Deprecated
+
+- `config/services.xml` and `config/services/rate_limiter.xml` now only import their PHP
+  counterparts, and will be removed in 3.0. Do not reference them.
+
 ## [2.0.2] - 2026-10-12
 
 ### Fixed

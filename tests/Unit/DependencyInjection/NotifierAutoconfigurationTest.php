@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Compiler\RegisterAutoconfigureAttribut
 use Symfony\Component\DependencyInjection\Compiler\ResolveInstanceofConditionalsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 /**
  * Declaring the notifier in a *separate* definition is the point: it proves the tag reaches
@@ -32,8 +32,8 @@ final class NotifierAutoconfigurationTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../../config'));
-        $loader->load('services.xml');
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../../../config'));
+        $loader->load('services.php');
 
         $definition = new Definition(HostAppNotifier::class);
         $definition->setAutoconfigured(true);

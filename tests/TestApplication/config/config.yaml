@@ -39,13 +39,13 @@ doctrine:
 
 # Sylius registers its Behat context services only in `services_test.php`, which the
 # shared test-application kernel never loads (its MicroKernelTrait takes the YAML
-# branch and looks for `services_test.yaml`). Import them here, in `test` only, so
-# `behat` can resolve the core Sylius contexts referenced by the imported core
-# suites.yml. Path is relative to this file (<plugin>/tests/TestApplication/config/).
+# branch and looks for `services_test.yaml`). They are imported, in `test` only, by the
+# plugin's own Behat services file, so `behat` can resolve the core Sylius contexts
+# referenced by the imported core suites.yml. Path is relative to this file
+# (<plugin>/tests/TestApplication/config/).
 when@test:
     imports:
-        - { resource: '../../../vendor/sylius/sylius/src/Sylius/Behat/Resources/config/services.xml' }
-        - { resource: '../../Behat/Resources/config/services.xml' }
+        - { resource: '../../Behat/Resources/config/services.php' }
 
     emagma_sylius_order_withdrawal:
         notification_email: 'sav@example.com'

@@ -56,7 +56,7 @@ The repository has two long-lived branches:
 
 | Branch           | Targets                                 |
 |------------------|-----------------------------------------|
-| `main`           | the whole Sylius 2 line — Sylius `~2.0.0 \|\| ~2.1.0 \|\| ~2.2.0` |
+| `main`           | the whole Sylius 2 line — Sylius `~2.0.0 \|\| ~2.1.0 \|\| ~2.2.0 \|\| ~2.3.0` |
 | `1.0.x-dev`      | Sylius `^1.14.0` (Sylius LTS), maintenance only |
 
 You do not need to pick a branch: say in the issue which line it concerns.
