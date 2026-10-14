@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Configuration and DefaultRecipientResolver are each tested alone; this covers the chain between
- * them — config, services.xml, a compiled container resolving the env var, the resolver built from
+ * them — config, services.php, a compiled container resolving the env var, the resolver built from
  * it. An unset `%env(default::…)%` reaches the constructor as null, so a non-nullable parameter
  * fails here with a TypeError and nowhere else.
  */

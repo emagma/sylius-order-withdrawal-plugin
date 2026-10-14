@@ -12,16 +12,16 @@
     ],
     "require": {
         "php": "^8.2",
-        "sylius/sylius": "~2.0.0 || ~2.1.0 || ~2.2.0",
-        "symfony/dependency-injection": "^6.4 || ^7.1"
+        "sylius/sylius": "~2.0.0 || ~2.1.0 || ~2.2.0 || ~2.3.0",
+        "symfony/dependency-injection": "^6.4 || ^7.1 || ^8.0"
     },
     "require-dev": {
-        "behat/behat": "^3.14",
+        "behat/behat": "^3.14 || ^4.0",
         "dmore/behat-chrome-extension": "^1.4",
         "dmore/chrome-mink-driver": "^2.9",
         "friends-of-behat/mink-browserkit-driver": "^1.6",
         "friends-of-behat/mink-debug-extension": "^2.1",
-        "friends-of-behat/mink-extension": "^2.7",
+        "friends-of-behat/mink-extension": "^2.7 || ^3.0@alpha",
         "friends-of-behat/page-object-extension": "^0.3",
         "friends-of-behat/suite-settings-extension": "^1.1",
         "friends-of-behat/symfony-extension": "^2.6",
@@ -31,16 +31,15 @@
         "phpstan/phpstan-symfony": "^2.0",
         "phpstan/phpstan-webmozart-assert": "^2.0",
         "phpunit/phpunit": "^10.5",
-        "polishsymfonycommunity/symfony-mocker-container": "^1.0",
         "rector/rector": "^2.0",
         "sylius-labs/coding-standard": "^4.4",
         "sylius/test-application": "^2.0.0@alpha",
-        "symfony/browser-kit": "^6.4 || ^7.1",
-        "symfony/debug-bundle": "^6.4 || ^7.1",
-        "symfony/dotenv": "^6.4 || ^7.1",
-        "symfony/intl": "^6.4 || ^7.1",
-        "symfony/rate-limiter": "^6.4 || ^7.1",
-        "symfony/web-profiler-bundle": "^6.4 || ^7.1"
+        "symfony/browser-kit": "^6.4 || ^7.1 || ^8.0",
+        "symfony/debug-bundle": "^6.4 || ^7.1 || ^8.0",
+        "symfony/dotenv": "^6.4 || ^7.1 || ^8.0",
+        "symfony/intl": "^6.4 || ^7.1 || ^8.0",
+        "symfony/rate-limiter": "^6.4 || ^7.1 || ^8.0",
+        "symfony/web-profiler-bundle": "^6.4 || ^7.1 || ^8.0"
     },
     "suggest": {
         "symfony/rate-limiter": "To throttle the public withdrawal form, by declaring a limiter under framework.rate_limiter and naming it in emagma_sylius_order_withdrawal.rate_limiter_service"

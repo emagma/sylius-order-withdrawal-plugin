@@ -42,7 +42,7 @@ src/
 config/
 ├── config.yaml                           the single import consumers use
 ├── routes.yaml → routes/{shop,admin}.yaml
-├── services.xml
+├── services.php → services/rate_limiter.php (only when a limiter is configured)
 ├── app/{resources,grids,mailer}.yaml
 ├── doctrine/WithdrawalRequest.orm.xml
 ├── validation/WithdrawalRequest.xml

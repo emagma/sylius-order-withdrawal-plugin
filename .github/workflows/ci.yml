@@ -64,11 +64,12 @@ jobs:
         run: vendor/bin/phpstan analyse --no-progress
 
   # Three axes, every value of each covered at least once:
-  #   Sylius   2.0, 2.1, 2.2 the three supported lines      (composer.json: ~2.0.0 || ~2.1.0 || ~2.2.0)
-  #   Symfony  6.4, 7.4      the LTS of each major          (intermediate minors are EOL)
-  #   PHP      8.2, 8.3, 8.4 every version allowed          (composer.json: ^8.2)
-  # Legs are listed explicitly rather than crossed: the full 2x2x3 would include
-  # combinations that cannot install. Newest stack gets every PHP, the edges get one each.
+  #   Sylius   2.0 - 2.3       the four supported lines     (composer.json: ~2.0.0 || ... || ~2.3.0)
+  #   Symfony  6.4, 7.4, 8.0   the LTS of 6 and 7, plus 8   (intermediate minors are EOL)
+  #   PHP      8.2, 8.3, 8.4   every version allowed        (composer.json: ^8.2)
+  # Legs are listed explicitly rather than crossed: the full 4x3x3 would include
+  # combinations that cannot install (Sylius 2.3 needs PHP 8.3, Symfony 8 needs PHP 8.4 and
+  # Sylius 2.3). Newest stack gets every PHP it allows, the edges get one each.
   tests:
     name: "Sylius ${{ matrix.sylius }} · Symfony ${{ matrix.symfony }} · PHP ${{ matrix.php }}"
     runs-on: ubuntu-latest
@@ -86,6 +87,12 @@ jobs:
           - { sylius: "2.2.*", symfony: "7.4.*", php: "8.2" }
           - { sylius: "2.2.*", symfony: "7.4.*", php: "8.3" }
           - { sylius: "2.2.*", symfony: "7.4.*", php: "8.4" }
+          # Sylius 2.3 (PHP ^8.3)
+          - { sylius: "2.3.*", symfony: "6.4.*", php: "8.3" }
+          - { sylius: "2.3.*", symfony: "7.4.*", php: "8.3" }
+          - { sylius: "2.3.*", symfony: "7.4.*", php: "8.4" }
+          # Symfony 8 needs PHP >= 8.4
+          - { sylius: "2.3.*", symfony: "8.0.*", php: "8.4" }
     steps:
       - uses: actions/checkout@v7
 
