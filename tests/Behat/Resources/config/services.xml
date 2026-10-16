@@ -53,6 +53,23 @@
             <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
             <argument type="service" id="sylius.behat.email_checker" />
         </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Admin\ManagingWithdrawalRequestsContext" public="true">
+            <argument type="service" id="sylius.behat.api_platform_client.admin" />
+            <argument type="service" id="Sylius\Behat\Client\ResponseCheckerInterface" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.manager.withdrawal_request" />
+            <argument type="service" id="sylius.behat.email_checker" />
+            <argument type="service" id="sylius.behat.request_factory" />
+            <argument>%sylius.security.api_route%</argument>
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Shop\SubmittingWithdrawalRequestContext" public="true">
+            <argument type="service" id="sylius.behat.api_platform_client.shop" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
+            <argument type="service" id="sylius.behat.email_checker" />
+            <argument type="service" id="sylius.behat.shared_storage" />
+        </service>
     </services>
 
 </container>
