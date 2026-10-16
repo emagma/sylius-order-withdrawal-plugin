@@ -6,6 +6,7 @@ default:
             paths:
                 - "%paths.base%/features/shop/requesting_order_withdrawal.feature"
             contexts:
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Hook\RateLimiterContext
                 - sylius.behat.context.hook.doctrine_orm
                 - sylius.behat.context.transform.shared_storage
                 - sylius.behat.context.setup.channel

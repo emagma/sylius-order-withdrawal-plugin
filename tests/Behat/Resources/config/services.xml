@@ -25,6 +25,10 @@
                  parent="sylius.behat.symfony_page" public="false" />
 
         <!-- Contexts -->
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Hook\RateLimiterContext" public="true">
+            <argument type="service" id="test.withdrawal_rate_limiter_pool" />
+        </service>
+
         <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\RequestingWithdrawalContext" public="true">
             <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\RequestWithdrawalPage" />
             <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
