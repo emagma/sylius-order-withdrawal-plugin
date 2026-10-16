@@ -6,6 +6,13 @@
                     https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
 
     <class name="Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest">
+        <constraint name="Expression">
+            <option name="expression">this.getState() in ['new', 'in_progress']</option>
+            <option name="message">emagma_sylius_order_withdrawal.api.closed_request_not_editable</option>
+            <option name="groups">
+                <value>emagma_sylius_order_withdrawal_api_update</value>
+            </option>
+        </constraint>
         <property name="firstName">
             <constraint name="NotBlank">
                 <option name="groups">
@@ -120,6 +127,19 @@
                 <option name="message">emagma_sylius_order_withdrawal.form.legal_notice_required</option>
                 <option name="groups">
                     <value>sylius</value>
+                </option>
+            </constraint>
+        </property>
+        <property name="localeCode">
+            <constraint name="Locale">
+                <option name="groups">
+                    <value>emagma_sylius_order_withdrawal_api_create</value>
+                </option>
+            </constraint>
+            <constraint name="Length">
+                <option name="max">255</option>
+                <option name="groups">
+                    <value>emagma_sylius_order_withdrawal_api_create</value>
                 </option>
             </constraint>
         </property>

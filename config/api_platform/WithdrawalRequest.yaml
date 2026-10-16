@@ -1,0 +1,140 @@
+# This file is part of the Emagma SyliusOrderWithdrawal Plugin.
+# (c) Emagma
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code.
+
+# YAML: API Platform 4.0 hangs on XML <openapi>. One file: 4.0 YAML files overwrite each other.
+# item_uri_template keeps the response @id on the item IRI: a transition URL is PATCH-only.
+
+resources:
+    '%emagma_sylius_order_withdrawal.model.withdrawal_request.class%':
+        -
+            shortName: WithdrawalRequest
+            description: "A consumer's request to withdraw from (cancel) an order within the legal withdrawal period. Lifecycle: new → in_progress → confirmed | rejected (confirm and reject are also allowed directly from new). The state is changed only through the start, confirm and reject operations; withdrawal requests cannot be deleted."
+            validationContext:
+                groups: [sylius]
+
+            operations:
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_get_collection:
+                    class: ApiPlatform\Metadata\GetCollection
+                    uriTemplate: /admin/withdrawal-requests
+                    paginationMaximumItemsPerPage: 100
+                    openapi:
+                        operationId: listWithdrawalRequests
+                        summary: List withdrawal requests
+                        description: "Paginated list, newest first by default. Filter with state / state[] (new, in_progress, confirmed, rejected), scope (full, partial), email, orderNumber, lastName (case-insensitive partial match), submittedAt[after|before|strictly_after|strictly_before] (ISO date), and sort with order[submittedAt] / order[id] (asc|desc). itemsPerPage is capped at 100."
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:index']
+                    filters:
+                        - emagma_sylius_order_withdrawal.api.search_filter.admin.withdrawal_request
+                        - emagma_sylius_order_withdrawal.api.date_filter.admin.withdrawal_request
+                        - emagma_sylius_order_withdrawal.api.order_filter.admin.withdrawal_request
+                    order:
+                        submittedAt: DESC
+
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_get:
+                    class: ApiPlatform\Metadata\Get
+                    uriTemplate: /admin/withdrawal-requests/{id}
+                    openapi:
+                        operationId: getWithdrawalRequest
+                        summary: Show a withdrawal request
+                        description: "Full details. availableTransitions lists the transitions (start, confirm, reject) the current state allows; an empty list means the request is closed."
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:show']
+
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_post:
+                    class: ApiPlatform\Metadata\Post
+                    uriTemplate: /admin/withdrawal-requests
+                    processor: Emagma\SyliusOrderWithdrawalPlugin\Api\State\WithdrawalRequestCreateProcessor
+                    openapi:
+                        operationId: createWithdrawalRequest
+                        summary: Record a withdrawal request
+                        description: "Records a request received by another channel (phone, email, letter). Required: firstName, lastName, email, orderNumber, orderDate (YYYY-MM-DD, not in the future), scope (full|partial), legalNoticeAccepted=true. message is required when scope is partial. receptionDate must not precede orderDate and must be empty when notYetReceived is true. channel (IRI, e.g. /api/v2/admin/channels/FASHION_WEB) and localeCode (a valid locale such as fr_FR) are optional. Side effects: the customer gets an acknowledgement email (if enabled) and the shop is notified. The new request is in state new."
+                    denormalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:create']
+                    validationContext:
+                        groups: [sylius, emagma_sylius_order_withdrawal_api_create]
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:show']
+
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch:
+                    class: ApiPlatform\Metadata\Patch
+                    uriTemplate: /admin/withdrawal-requests/{id}
+                    openapi:
+                        operationId: updateWithdrawalRequest
+                        summary: Correct a withdrawal request
+                        description: "Partial update (application/merge-patch+json) of the customer-provided data: firstName, lastName, email, orderNumber, orderDate, notYetReceived, receptionDate, scope, message. Only while the request is new or in_progress: a confirmed or rejected request is a closed legal record and the update is refused with 422. state cannot be changed here: use the start, confirm and reject operations."
+                    validationContext:
+                        groups: [sylius, emagma_sylius_order_withdrawal_api_update]
+                    denormalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:update']
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:show']
+
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch_start:
+                    class: ApiPlatform\Metadata\Patch
+                    uriTemplate: /admin/withdrawal-requests/{id}/start
+                    input: false
+                    validate: false
+                    processor: Emagma\SyliusOrderWithdrawalPlugin\Api\State\WithdrawalRequestTransitionProcessor
+                    openapi:
+                        operationId: startWithdrawalRequest
+                        summary: Take a withdrawal request in charge
+                        description: "Moves the request from new to in_progress. No request body. Returns 422 from any other state."
+                    extraProperties:
+                        emagma_transition: !php/enum Emagma\SyliusOrderWithdrawalPlugin\Model\WithdrawalRequestTransition::Start->value
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:show']
+                        item_uri_template: /admin/withdrawal-requests/{id}
+
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch_confirm:
+                    class: ApiPlatform\Metadata\Patch
+                    uriTemplate: /admin/withdrawal-requests/{id}/confirm
+                    input: false
+                    validate: false
+                    processor: Emagma\SyliusOrderWithdrawalPlugin\Api\State\WithdrawalRequestTransitionProcessor
+                    openapi:
+                        operationId: confirmWithdrawalRequest
+                        summary: Confirm a withdrawal request
+                        description: "Accepts the withdrawal: moves the request from new or in_progress to confirmed and emails the confirmation to the customer. No request body. Returns 422 from confirmed or rejected."
+                    extraProperties:
+                        emagma_transition: !php/enum Emagma\SyliusOrderWithdrawalPlugin\Model\WithdrawalRequestTransition::Confirm->value
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:show']
+                        item_uri_template: /admin/withdrawal-requests/{id}
+
+                emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch_reject:
+                    class: ApiPlatform\Metadata\Patch
+                    uriTemplate: /admin/withdrawal-requests/{id}/reject
+                    input: false
+                    validate: false
+                    processor: Emagma\SyliusOrderWithdrawalPlugin\Api\State\WithdrawalRequestTransitionProcessor
+                    openapi:
+                        operationId: rejectWithdrawalRequest
+                        summary: Reject a withdrawal request
+                        description: "Refuses the withdrawal: moves the request from new or in_progress to rejected. No email is sent. No request body. Returns 422 from confirmed or rejected."
+                    extraProperties:
+                        emagma_transition: !php/enum Emagma\SyliusOrderWithdrawalPlugin\Model\WithdrawalRequestTransition::Reject->value
+                    normalizationContext:
+                        groups: ['emagma:admin:withdrawal_request:show']
+                        item_uri_template: /admin/withdrawal-requests/{id}
+
+        -
+            shortName: WithdrawalRequest
+            description: "A consumer's request to withdraw from (cancel) an order within the legal withdrawal period. Lifecycle: new → in_progress → confirmed | rejected (confirm and reject are also allowed directly from new). The state is changed only through the start, confirm and reject operations; withdrawal requests cannot be deleted."
+            validationContext:
+                groups: [sylius]
+
+            operations:
+                emagma_sylius_order_withdrawal_api_shop_withdrawal_request_post:
+                    class: ApiPlatform\Metadata\Post
+                    uriTemplate: /shop/withdrawal-requests
+                    processor: Emagma\SyliusOrderWithdrawalPlugin\Api\State\WithdrawalRequestCreateProcessor
+                    output: false
+                    status: 202
+                    openapi:
+                        operationId: submitWithdrawalRequest
+                        summary: Submit a withdrawal request
+                        description: "Public endpoint for a headless storefront. Same fields and rules as the shop form: firstName, lastName, email, orderNumber, orderDate, notYetReceived, receptionDate, scope (full|partial), message (required for partial), legalNoticeAccepted=true. Channel and locale come from the request context. Returns 202 Accepted with an empty body: the request is recorded and the customer receives the acknowledgement email. Rate-limited per client IP (429)."
+                    denormalizationContext:
+                        groups: ['emagma:shop:withdrawal_request:create']

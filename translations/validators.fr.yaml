@@ -6,3 +6,5 @@ emagma_sylius_order_withdrawal:
         reception_date_not_in_future: 'La date de réception ne peut pas être dans le futur.'
         reception_date_before_order_date: 'La date de réception ne peut pas être antérieure à la date de commande.'
         reception_date_conflicts_with_not_yet_received: 'Laissez la date de réception vide lorsque la commande n''a pas encore été reçue.'
+    api:
+        closed_request_not_editable: 'Cette demande de rétractation est clôturée (confirmée ou refusée) et ne peut plus être modifiée.'
