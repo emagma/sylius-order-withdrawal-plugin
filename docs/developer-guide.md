@@ -13,6 +13,7 @@
 | Move the storefront link | [Twig hook](#moving-or-removing-the-footer-link) |
 | Change who the notification email reaches | [Recipient resolver](#emails-and-recipients) |
 | Store extra fields | [Entity](#extending-the-entity) |
+| Drive it through an API | [API](#api) |
 | Ship your own JavaScript | [Front-end assets](#front-end-assets) |
 | Add a locale | [Translating](#translating) |
 | Run the suites | [Testing](#testing) |
@@ -183,10 +184,11 @@ Listen to the Symfony workflow event:
 
 ```php
 use Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest;
+use Emagma\SyliusOrderWithdrawalPlugin\Model\WithdrawalRequestTransition;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Workflow\Event\CompletedEvent;
 
-#[AsEventListener(event: 'workflow.emagma_sylius_order_withdrawal_request.completed')]
+#[AsEventListener(event: 'workflow.' . WithdrawalRequestTransition::GRAPH . '.completed')]
 final class NotifyOnRejection
 {
     public function __invoke(CompletedEvent $event): void
@@ -195,7 +197,7 @@ final class NotifyOnRejection
             return;
         }
 
-        if ('reject' !== $event->getTransition()?->getName()) {
+        if (WithdrawalRequestTransition::Reject->value !== $event->getTransition()?->getName()) {
             return;
         }
 
@@ -499,6 +501,180 @@ class WithdrawalRequest extends BaseWithdrawalRequest
 
 If you only need extra input to reach a human, add an unmapped form field and append it to the
 notification email.
+
+## API
+
+The plugin can expose withdrawal requests through the Sylius API (API Platform), so that scripts and
+automated callers, such as MCP tools, can list, read, record and process them. It is plain REST plus
+the OpenAPI document Sylius already generates.
+
+**The API is off by default.** Nothing below exists until you enable it, and an application that
+does not is unchanged. See [enabling the API](#enabling-the-api).
+
+### Endpoints
+
+All paths are under `/api/v2`. Admin operations need an admin JWT: like every Sylius admin
+endpoint, they are protected by the `api_admin` firewall, which requires `ROLE_API_ACCESS`. The shop
+operation is public.
+
+Admin operations exist only with `api.admin: true`; the shop operation only with `api.shop: true`.
+
+| Operation | Method & path | Body | Success |
+|---|---|---|---|
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_get_collection` | `GET /admin/withdrawal-requests` | — | 200, paginated (max 100 per page) |
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_get` | `GET /admin/withdrawal-requests/{id}` | — | 200 |
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_post` | `POST /admin/withdrawal-requests` | create fields + `channel` (IRI), `localeCode` | 201 |
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch` | `PATCH /admin/withdrawal-requests/{id}` (`application/merge-patch+json`) | editable fields | 200 |
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch_start` | `PATCH /admin/withdrawal-requests/{id}/start` | none | 200 |
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch_confirm` | `PATCH /admin/withdrawal-requests/{id}/confirm` | none | 200 |
+| `emagma_sylius_order_withdrawal_api_admin_withdrawal_request_patch_reject` | `PATCH /admin/withdrawal-requests/{id}/reject` | none | 200 |
+| `emagma_sylius_order_withdrawal_api_shop_withdrawal_request_post` | `POST /shop/withdrawal-requests` | `firstName`, `lastName`, `email`, `orderNumber`, `orderDate`, `notYetReceived`, `receptionDate`, `scope`, `message`, `legalNoticeAccepted` | **202, empty body, no `Location`** |
+
+The operation names are also the route names. They are namespaced `…_api_…` so they never clash with
+the admin UI routes. There is no `PUT` and no `DELETE`: a withdrawal request is a legal record, and
+`reject` closes it. There is no GraphQL either: even with API Platform's GraphQL support enabled, the
+resource exposes no query or mutation.
+
+What to know about the behaviour:
+
+- **Listing.** Filters: `state` (or `state[]` for several), `scope`, `email`, `orderNumber` and
+  `lastName` (case-insensitive partial match), `submittedAt[after|before|strictly_after|strictly_before]`.
+  Ordering: `order[submittedAt]` or `order[id]`, newest `submittedAt` first by default.
+  `itemsPerPage` is capped at 100.
+- **Showing.** The item carries `availableTransitions`: the transitions (`start`, `confirm`,
+  `reject`) the request accepts right now.
+- **Editing.** `PATCH` on the item is a merge-patch. It is refused with a 422 once the request is
+  `confirmed` or `rejected`. `state` is never writable: it only moves through the three transition
+  operations. `updatedAt` is the time of the last state change (`null` until the first one): a correction does
+  not touch it.
+  A correction is not serialised against a concurrent transition. Doctrine writes only the columns
+  that changed, so a correction never reverts a state, but it can land on a request that was closed
+  a moment earlier.
+- **Transitions.** They take no body. One that the current state does not allow is refused with a
+  422. `confirm` emails the customer, exactly once. Transitions are serialised with a row lock, so
+  two concurrent `confirm` calls cannot both succeed.
+- **Creating.** Create uses the same validation as the storefront form (the `sylius` group): the
+  legal notice must be accepted, and `message` is required for a partial withdrawal. Keys that are
+  not writable (`state`, `submittedAt`, …) are ignored. Admin create also validates `localeCode`.
+- **Shop create.** Answers `202 Accepted` with an empty body and no `Location` header, so it never
+  discloses an id. A body that contains `id` is rejected with a 400; `state` and `submittedAt` are
+  ignored. It is throttled per client IP (429) and **shares the storefront form's budget**.
+
+### Authentication
+
+The administrator behind the token must hold `ROLE_API_ACCESS`. Sylius requires it for every admin
+API endpoint, its own included, and a token for an administrator without it gets a 403 everywhere.
+The Sylius fixture administrator only has it when the `admin_user` fixture is given the option
+`api: true`; otherwise add the role to the administrator yourself.
+
+Get a token for an administrator, then send it as a bearer token:
+
+```bash
+TOKEN=$(curl -s -X POST https://shop.example.com/api/v2/admin/administrators/token \
+    -H 'Content-Type: application/json' \
+    -d '{"email": "api@example.com", "password": "…"}' | jq -r .token)
+```
+
+List the requests that are new or in progress, newest first:
+
+```bash
+curl -s -g 'https://shop.example.com/api/v2/admin/withdrawal-requests?state[]=new&state[]=in_progress&order[submittedAt]=desc&itemsPerPage=20' \
+    -H "Authorization: Bearer $TOKEN" \
+    -H 'Accept: application/ld+json'
+```
+
+Confirm one. The body is empty; send `application/merge-patch+json` as for any `PATCH`:
+
+```bash
+curl -s -X PATCH https://shop.example.com/api/v2/admin/withdrawal-requests/42/confirm \
+    -H "Authorization: Bearer $TOKEN" \
+    -H 'Content-Type: application/merge-patch+json'
+```
+
+Confirming a request that is already closed answers 422 and sends nothing.
+
+### OpenAPI document
+
+The OpenAPI document is served at `/api/v2/docs.jsonopenapi` (`debug:router` lists it as
+`api_doc`, path `/api/v2/docs.{_format}`), under the `WithdrawalRequest` tag. Every operation carries
+a summary, a description — what it does, which emails it sends, which states it accepts — and a
+short `operationId`: `listWithdrawalRequests`, `getWithdrawalRequest`, `createWithdrawalRequest`,
+`updateWithdrawalRequest`, `startWithdrawalRequest`, `confirmWithdrawalRequest`,
+`rejectWithdrawalRequest` and, for the shop, `submitWithdrawalRequest`.
+
+`availableTransitions` is **not part of the generated OpenAPI schema**, because a normalizer adds it
+to the item at runtime; the description of the Get operation mentions it.
+
+### Enabling the API
+
+Switch on what you need, and declare a rate limiter if you enable `shop`:
+
+```yaml
+# config/packages/emagma_sylius_order_withdrawal.yaml
+emagma_sylius_order_withdrawal:
+    rate_limiter_service: 'limiter.withdrawal_request'   # required by api.shop
+    api:
+        admin: true   # list, show, create, update, start/confirm/reject
+        shop: true    # public POST /api/v2/shop/withdrawal-requests
+```
+
+```yaml
+# config/packages/rate_limiter.yaml
+framework:
+    rate_limiter:
+        withdrawal_request:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '1 hour'
+            # Without symfony/lock installed, a limiter needs this line:
+            # lock_factory: null
+```
+
+- Both switches default to `false` and are **independent**: `shop` alone, for a headless storefront
+  with no admin API, is valid.
+- They are **compile-time**. Use `true`, `false` or a `%parameter%` that resolves to a boolean; a
+  `%env()%` value is rejected. A bare `~` means `true`.
+- Either switch needs API Platform, which every Sylius application ships; without it the container
+  build fails with a `LogicException`.
+- `shop` opens a **public, unauthenticated endpoint**, so it requires `rate_limiter_service` and
+  fails the container build without it. The limiter is the same one as the form's, and is keyed per
+  client IP.
+- A limiter declared under `framework.rate_limiter` needs `symfony/lock`, or `lock_factory: null` on
+  the limiter. See the [user guide](user-guide.md) for the trade-off.
+- The shop POST answers `202 Accepted` with an empty body.
+
+Independently of the switches, the plugin maps its workflow graph to the `symfony_workflow` adapter
+in `sylius_state_machine_abstraction.graphs_to_adapters_mapping`, so the API reaches it whatever
+default adapter your application uses. A mapping of your own for that graph wins.
+
+### Security notes
+
+- **Give each API client a dedicated admin user.** Any administrator holding `ROLE_API_ACCESS`
+  has full API access, so a client should not borrow a person's account: create one administrator
+  for it, with that role and nothing else, and revoke it on its own.
+- **Behind a reverse proxy, set `framework.trusted_proxies`.** Without it every client shares one
+  rate-limit key — the proxy's address — and one noisy caller throttles everyone.
+- **The acknowledgement email contains what the submitter typed** — their name and the order number —
+  and goes to an address nobody has verified. This is why the shop endpoint is throttled, and why it
+  cannot be enabled without a limiter. See [the public endpoint](../SECURITY.md#public-endpoint).
+- **Transitions are serialised.** The admin API locks the row before it checks the state, so
+  concurrent or retried calls cannot confirm a request twice.
+
+### Extending the API
+
+The resource is registered on `%emagma_sylius_order_withdrawal.model.withdrawal_request.class%`, so
+an [extended entity](#extending-the-entity) is exposed too. To expose a field you added, put it in
+the serialization groups the plugin uses — `emagma:admin:withdrawal_request:index`, `:show`, `:create`
+and `:update` for the admin API, `emagma:shop:withdrawal_request:create` for the shop one — from your
+own serialization mapping of your entity class.
+
+Three interfaces are the supported extension points; their implementations are `@internal`:
+
+| Interface | Role |
+| --- | --- |
+| `Submission\WithdrawalRequestSubmissionHandlerInterface` | what happens around a submission: `prepare()` stamps `submittedAt`, channel and locale; `complete()` sends the acknowledgement email, runs the notifiers and dispatches `WithdrawalRequestSubmitted`. Decorate it to change the side effects of a submission, from the form or the API alike. |
+| `Confirmation\PendingConfirmationQueueInterface` | the confirmations waiting to be emailed once their transition is committed. |
+| `StateMachine\WithdrawalRequestTransitionApplierInterface` | applies a transition (refusing it when not allowed) and lists the available ones. |
 
 ## Database migrations
 
