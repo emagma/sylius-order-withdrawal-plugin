@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueue;
+use Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueueInterface;
 use Emagma\SyliusOrderWithdrawalPlugin\EventListener\WithdrawalRequestListener;
 use Emagma\SyliusOrderWithdrawalPlugin\Form\Type\WithdrawalRequestType;
 use Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailer;
@@ -21,6 +23,10 @@ use Emagma\SyliusOrderWithdrawalPlugin\Resolver\DefaultRecipientResolver;
 use Emagma\SyliusOrderWithdrawalPlugin\Resolver\RecipientResolverInterface;
 use Emagma\SyliusOrderWithdrawalPlugin\Resolver\WithdrawalRequestContextResolver;
 use Emagma\SyliusOrderWithdrawalPlugin\Resolver\WithdrawalRequestContextResolverInterface;
+use Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplier;
+use Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplierInterface;
+use Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandler;
+use Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandlerInterface;
 
 return static function (ContainerConfigurator $container): void {
     $container->parameters()
@@ -35,7 +41,7 @@ return static function (ContainerConfigurator $container): void {
     ;
 
     $services->load('Emagma\\SyliusOrderWithdrawalPlugin\\', '../src/*')
-        ->exclude('../src/{DependencyInjection,Entity,Migrations,Model,Event,EmagmaSyliusOrderWithdrawalPlugin.php,EventListener/WithdrawalRequestRateLimitListener.php}')
+        ->exclude('../src/{Api,DependencyInjection,Entity,Migrations,Model,Event,EmagmaSyliusOrderWithdrawalPlugin.php,EventListener/WithdrawalRequestRateLimitListener.php}')
     ;
 
     $services->set(DefaultRecipientResolver::class)
@@ -76,6 +82,35 @@ return static function (ContainerConfigurator $container): void {
         ->tag('form.type')
     ;
 
+    $services->set(WithdrawalRequestSubmissionHandler::class)
+        ->args([
+            service(WithdrawalRequestEmailerInterface::class),
+            service(WithdrawalRequestNotifierAggregatorInterface::class),
+            service('event_dispatcher'),
+            service('sylius.context.channel'),
+            service('sylius.context.locale'),
+            param('emagma_sylius_order_withdrawal.send_acknowledgement'),
+            service('logger')->nullOnInvalid(),
+            service('clock')->nullOnInvalid(),
+        ])
+    ;
+    $services->alias(WithdrawalRequestSubmissionHandlerInterface::class, WithdrawalRequestSubmissionHandler::class);
+
+    $services->set(PendingConfirmationQueue::class)
+        ->args([
+            service(WithdrawalRequestEmailerInterface::class),
+            service('logger')->nullOnInvalid(),
+        ])
+    ;
+    $services->alias(PendingConfirmationQueueInterface::class, PendingConfirmationQueue::class);
+
+    $services->set(WithdrawalRequestTransitionApplier::class)
+        ->args([
+            service('sylius_abstraction.state_machine'),
+        ])
+    ;
+    $services->alias(WithdrawalRequestTransitionApplierInterface::class, WithdrawalRequestTransitionApplier::class);
+
     $services->set(WithdrawalRequestListener::class)
         ->args([
             service(WithdrawalRequestEmailerInterface::class),
@@ -86,6 +121,8 @@ return static function (ContainerConfigurator $container): void {
             param('emagma_sylius_order_withdrawal.send_acknowledgement'),
             service('logger')->nullOnInvalid(),
             service('clock')->nullOnInvalid(),
+            service(WithdrawalRequestSubmissionHandlerInterface::class),
+            service(PendingConfirmationQueueInterface::class),
         ])
     ;
 };
