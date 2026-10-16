@@ -93,6 +93,10 @@ to say so, and acknowledge it on a durable medium. This plugin is that mechanism
 - **An admin screen** — a filterable grid, plus a detail page with three actions: take in charge,
   confirm, reject. Confirming emails the customer.
 - **Channel- and locale-aware** — each request records where and in which language it came from.
+- **Admin and shop API** — opt-in and off by default: an admin REST API to list, filter, record and
+  process requests, and a throttled public create endpoint, both described by the Sylius OpenAPI
+  document, so scripts and MCP tools can drive them. See the
+  [developer guide](docs/developer-guide.md#api).
 - **Extensible** — a state machine, a domain event, a notifier interface, and overridable
   templates and emails.
 
