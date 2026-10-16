@@ -86,6 +86,7 @@ default:
                 - sylius.behat.context.transform.shared_storage
                 - sylius.behat.context.setup.channel
                 - sylius.behat.context.hook.mailer
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext
                 - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Shop\SubmittingWithdrawalRequestContext
             filters:
                 tags: "@managing_order_withdrawal_requests&&@api"

@@ -69,6 +69,7 @@
             <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
             <argument type="service" id="sylius.behat.email_checker" />
             <argument type="service" id="sylius.behat.shared_storage" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.manager.withdrawal_request" />
         </service>
     </services>
 

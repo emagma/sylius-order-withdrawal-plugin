@@ -14,6 +14,7 @@ namespace Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Shop;
 use Behat\Behat\Context\Context;
 use Behat\Step\Then;
 use Behat\Step\When;
+use Doctrine\Persistence\ObjectManager;
 use Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest;
 use Sylius\Behat\Client\ApiClientInterface;
 use Sylius\Behat\Service\Checker\EmailCheckerInterface;
@@ -35,6 +36,7 @@ final class SubmittingWithdrawalRequestContext implements Context
         private readonly RepositoryInterface $repository,
         private readonly EmailCheckerInterface $emailChecker,
         private readonly SharedStorageInterface $sharedStorage,
+        private readonly ObjectManager $manager,
     ) {
     }
 
@@ -56,10 +58,10 @@ final class SubmittingWithdrawalRequestContext implements Context
         $this->submit(['orderNumber' => $orderNumber, 'scope' => 'partial', 'message' => null]);
     }
 
-    #[When('I submit through the shop API a withdrawal request for order :orderNumber with the id :id')]
-    public function iSubmitAWithdrawalRequestWithAnId(string $orderNumber, int $id): void
+    #[When('I submit through the shop API a withdrawal request for order :orderNumber with the id of this withdrawal request')]
+    public function iSubmitAWithdrawalRequestWithTheIdOfThisWithdrawalRequest(string $orderNumber): void
     {
-        $this->submit(['orderNumber' => $orderNumber, 'id' => $id]);
+        $this->submit(['orderNumber' => $orderNumber, 'id' => $this->existingId()]);
     }
 
     #[When('I submit through the shop API :count withdrawal requests in a row')]
@@ -116,17 +118,24 @@ final class SubmittingWithdrawalRequestContext implements Context
         Assert::contains((string) $response->getContent(), sprintf('"propertyPath":"%s"', $property));
     }
 
-    #[Then('no withdrawal request for order :orderNumber should be recorded')]
-    public function noWithdrawalRequestShouldBeRecorded(string $orderNumber): void
+    #[Then('a withdrawal request for order :orderNumber should be recorded with a different id from this withdrawal request')]
+    public function aWithdrawalRequestShouldBeRecordedWithADifferentId(string $orderNumber): void
     {
-        Assert::null($this->repository->findOneBy(['orderNumber' => $orderNumber]));
+        $this->manager->clear();
+        $request = $this->repository->findOneBy(['orderNumber' => $orderNumber]);
+        Assert::isInstanceOf($request, WithdrawalRequest::class);
+        Assert::notNull($request->getId());
+        Assert::notSame($request->getId(), $this->existingId());
     }
 
-    #[Then('the shop API should refuse it as a bad request')]
-    public function theShopApiShouldRefuseItAsABadRequest(): void
+    #[Then('this withdrawal request should still be for order :orderNumber with email :email')]
+    public function thisWithdrawalRequestShouldStillBeForOrderWithEmail(string $orderNumber, string $email): void
     {
-        $response = $this->client->getLastResponse();
-        Assert::same($response->getStatusCode(), Response::HTTP_BAD_REQUEST, (string) $response->getContent());
+        $this->manager->clear();
+        $request = $this->repository->find($this->existingId());
+        Assert::isInstanceOf($request, WithdrawalRequest::class);
+        Assert::same($request->getOrderNumber(), $orderNumber);
+        Assert::same($request->getEmail(), $email);
     }
 
     #[Then('the first :count shop API submissions should have been accepted')]
@@ -154,6 +163,16 @@ final class SubmittingWithdrawalRequestContext implements Context
     public function theShopApiShouldAnswerNotFound(): void
     {
         Assert::inArray($this->client->getLastResponse()->getStatusCode(), [Response::HTTP_NOT_FOUND, Response::HTTP_METHOD_NOT_ALLOWED]);
+    }
+
+    private function existingId(): int
+    {
+        $request = $this->sharedStorage->get('withdrawal_request');
+        Assert::isInstanceOf($request, WithdrawalRequest::class);
+        $id = $request->getId();
+        Assert::integer($id);
+
+        return $id;
     }
 
     /** @param array<string, mixed> $overrides */

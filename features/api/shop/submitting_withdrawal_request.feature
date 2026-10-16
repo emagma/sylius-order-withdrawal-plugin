@@ -22,10 +22,12 @@ Feature: Submitting a withdrawal request through the shop API
         When I submit through the shop API a partial withdrawal request for order "000000123" without detail
         Then the shop API should reject it with a violation on "message"
 
-    Scenario: A body containing an id is refused
-        When I submit through the shop API a withdrawal request for order "000000125" with the id 999999
-        Then the shop API should refuse it as a bad request
-        And no withdrawal request for order "000000125" should be recorded
+    Scenario: A body containing an id cannot target an existing request
+        Given there is a withdrawal request for order "000000456" from "Anne Martin" with email "anne@example.com" in state "new"
+        When I submit through the shop API a withdrawal request for order "000000125" with the id of this withdrawal request
+        Then the shop API should accept the submission without echoing anything back
+        And a withdrawal request for order "000000125" should be recorded with a different id from this withdrawal request
+        And this withdrawal request should still be for order "000000456" with email "anne@example.com"
 
     Scenario: The shop API throttles repeated submissions
         When I submit through the shop API 4 withdrawal requests in a row
