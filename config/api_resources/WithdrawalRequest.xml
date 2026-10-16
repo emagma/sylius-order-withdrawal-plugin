@@ -1,0 +1,180 @@
+<?xml version="1.0" ?>
+
+<!--
+ This file is part of the Emagma SyliusOrderWithdrawal Plugin.
+ (c) Emagma
+ For the full copyright and license information, please view the LICENSE
+ file that was distributed with this source code.
+-->
+
+<resources xmlns="https://api-platform.com/schema/metadata"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="https://api-platform.com/schema/metadata https://api-platform.com/schema/metadata/metadata-2.0.xsd"
+>
+    <resource class="%emagma_sylius_order_withdrawal.model.withdrawal_request.class%" shortName="WithdrawalRequest" description="A consumer's request to withdraw from (cancel) an order within the legal withdrawal period. Lifecycle: new → in_progress → confirmed | rejected (confirm and reject are also allowed directly from new). The state is changed only through the start, confirm and reject operations; withdrawal requests cannot be deleted.">
+
+        <attribute name="validation_groups">sylius</attribute>
+        <attribute name="order">
+            <attribute name="submittedAt">DESC</attribute>
+        </attribute>
+
+        <collectionOperations>
+            <collectionOperation name="admin_get">
+                <attribute name="method">GET</attribute>
+                <attribute name="path">/admin/withdrawal-requests</attribute>
+                <attribute name="pagination_maximum_items_per_page">100</attribute>
+                <attribute name="filters">
+                    <attribute>emagma_sylius_order_withdrawal.api.search_filter.admin.withdrawal_request</attribute>
+                    <attribute>emagma_sylius_order_withdrawal.api.date_filter.admin.withdrawal_request</attribute>
+                    <attribute>emagma_sylius_order_withdrawal.api.order_filter.admin.withdrawal_request</attribute>
+                </attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">listWithdrawalRequests</attribute>
+                    <attribute name="summary">List withdrawal requests</attribute>
+                    <attribute name="description">Paginated list, newest first by default. Filter with state / state[] (new, in_progress, confirmed, rejected), scope (full, partial), email, orderNumber, lastName (case-insensitive partial match), submittedAt[after|before|strictly_after|strictly_before] (ISO date), and sort with order[submittedAt] / order[id] (asc|desc). itemsPerPage is capped at 100.</attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:index</attribute>
+                    </attribute>
+                </attribute>
+            </collectionOperation>
+
+            <collectionOperation name="admin_post">
+                <attribute name="method">POST</attribute>
+                <attribute name="path">/admin/withdrawal-requests</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">createWithdrawalRequest</attribute>
+                    <attribute name="summary">Record a withdrawal request</attribute>
+                    <attribute name="description">Records a request received by another channel (phone, email, letter). Required: firstName, lastName, email, orderNumber, orderDate (YYYY-MM-DD, not in the future), scope (full|partial), legalNoticeAccepted=true. message is required when scope is partial. receptionDate must not precede orderDate and must be empty when notYetReceived is true. channel (IRI, e.g. /api/v2/admin/channels/FASHION_WEB) and localeCode (a valid locale such as fr_FR) are optional. Side effects: the customer gets an acknowledgement email (if enabled) and the shop is notified. The new request is in state new.</attribute>
+                </attribute>
+                <attribute name="denormalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:create</attribute>
+                    </attribute>
+                </attribute>
+                <attribute name="validation_groups">
+                    <attribute>sylius</attribute>
+                    <attribute>emagma_sylius_order_withdrawal_api_create</attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:show</attribute>
+                    </attribute>
+                </attribute>
+            </collectionOperation>
+
+            <collectionOperation name="shop_post">
+                <attribute name="method">POST</attribute>
+                <attribute name="path">/shop/withdrawal-requests</attribute>
+                <attribute name="output">false</attribute>
+                <attribute name="status">202</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">submitWithdrawalRequest</attribute>
+                    <attribute name="summary">Submit a withdrawal request</attribute>
+                    <attribute name="description">Public endpoint for a headless storefront. Same fields and rules as the shop form: firstName, lastName, email, orderNumber, orderDate, notYetReceived, receptionDate, scope (full|partial), message (required for partial), legalNoticeAccepted=true. Channel and locale come from the request context. Returns 202 Accepted with an empty body: the request is recorded and the customer receives the acknowledgement email. Rate-limited per client IP (429).</attribute>
+                </attribute>
+                <attribute name="denormalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:shop:withdrawal_request:create</attribute>
+                    </attribute>
+                </attribute>
+            </collectionOperation>
+        </collectionOperations>
+
+        <itemOperations>
+            <itemOperation name="admin_get">
+                <attribute name="method">GET</attribute>
+                <attribute name="path">/admin/withdrawal-requests/{id}</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">getWithdrawalRequest</attribute>
+                    <attribute name="summary">Show a withdrawal request</attribute>
+                    <attribute name="description">Full details. availableTransitions lists the transitions (start, confirm, reject) the current state allows; an empty list means the request is closed.</attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:show</attribute>
+                    </attribute>
+                </attribute>
+            </itemOperation>
+
+            <itemOperation name="admin_patch">
+                <attribute name="method">PATCH</attribute>
+                <attribute name="path">/admin/withdrawal-requests/{id}</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">updateWithdrawalRequest</attribute>
+                    <attribute name="summary">Correct a withdrawal request</attribute>
+                    <attribute name="description">Partial update (application/merge-patch+json) of the customer-provided data: firstName, lastName, email, orderNumber, orderDate, notYetReceived, receptionDate, scope, message. Only while the request is new or in_progress: a confirmed or rejected request is a closed legal record and the update is refused with 422. state cannot be changed here: use the start, confirm and reject operations.</attribute>
+                </attribute>
+                <attribute name="validation_groups">
+                    <attribute>sylius</attribute>
+                    <attribute>emagma_sylius_order_withdrawal_api_update</attribute>
+                </attribute>
+                <attribute name="denormalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:update</attribute>
+                    </attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:show</attribute>
+                    </attribute>
+                </attribute>
+            </itemOperation>
+
+            <itemOperation name="admin_start">
+                <attribute name="method">PATCH</attribute>
+                <attribute name="path">/admin/withdrawal-requests/{id}/start</attribute>
+                <attribute name="input">false</attribute>
+                <attribute name="validate">false</attribute>
+                <attribute name="controller">emagma_sylius_order_withdrawal.api.controller.apply_transition::start</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">startWithdrawalRequest</attribute>
+                    <attribute name="summary">Take a withdrawal request in charge</attribute>
+                    <attribute name="description">Moves the request from new to in_progress. No request body. Returns 422 from any other state.</attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:show</attribute>
+                    </attribute>
+                </attribute>
+            </itemOperation>
+
+            <itemOperation name="admin_confirm">
+                <attribute name="method">PATCH</attribute>
+                <attribute name="path">/admin/withdrawal-requests/{id}/confirm</attribute>
+                <attribute name="input">false</attribute>
+                <attribute name="validate">false</attribute>
+                <attribute name="controller">emagma_sylius_order_withdrawal.api.controller.apply_transition::confirm</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">confirmWithdrawalRequest</attribute>
+                    <attribute name="summary">Confirm a withdrawal request</attribute>
+                    <attribute name="description">Accepts the withdrawal: moves the request from new or in_progress to confirmed and emails the confirmation to the customer. No request body. Returns 422 from confirmed or rejected.</attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:show</attribute>
+                    </attribute>
+                </attribute>
+            </itemOperation>
+
+            <itemOperation name="admin_reject">
+                <attribute name="method">PATCH</attribute>
+                <attribute name="path">/admin/withdrawal-requests/{id}/reject</attribute>
+                <attribute name="input">false</attribute>
+                <attribute name="validate">false</attribute>
+                <attribute name="controller">emagma_sylius_order_withdrawal.api.controller.apply_transition::reject</attribute>
+                <attribute name="openapi_context">
+                    <attribute name="operationId">rejectWithdrawalRequest</attribute>
+                    <attribute name="summary">Reject a withdrawal request</attribute>
+                    <attribute name="description">Refuses the withdrawal: moves the request from new or in_progress to rejected. No email is sent. No request body. Returns 422 from confirmed or rejected.</attribute>
+                </attribute>
+                <attribute name="normalization_context">
+                    <attribute name="groups">
+                        <attribute>emagma:admin:withdrawal_request:show</attribute>
+                    </attribute>
+                </attribute>
+            </itemOperation>
+        </itemOperations>
+    </resource>
+</resources>

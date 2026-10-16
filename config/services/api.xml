@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Loaded only when api.admin or api.shop is on. -->
+        <defaults public="false" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Api\Metadata\WithdrawalRequestOperationsResourceMetadataFactory"
+                 decorates="api_platform.metadata.resource.metadata_factory"
+                 decoration-priority="1">
+            <argument type="service" id=".inner" />
+            <argument>%emagma_sylius_order_withdrawal.model.withdrawal_request.class%</argument>
+            <argument>%emagma_sylius_order_withdrawal.api.admin%</argument>
+            <argument>%emagma_sylius_order_withdrawal.api.shop%</argument>
+        </service>
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Api\Serializer\AvailableTransitionsNormalizer">
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplierInterface" />
+            <tag name="serializer.normalizer" priority="64" />
+        </service>
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Api\DataPersister\WithdrawalRequestDataPersister">
+            <argument type="service" id="api_platform.doctrine.orm.data_persister" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandlerInterface" />
+            <tag name="api_platform.data_persister" priority="10" />
+        </service>
+
+        <service id="emagma_sylius_order_withdrawal.api.controller.apply_transition"
+                 class="Emagma\SyliusOrderWithdrawalPlugin\Api\Controller\ApplyWithdrawalRequestTransitionAction"
+                 public="true">
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplierInterface" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueueInterface" />
+        </service>
+
+        <service id="emagma_sylius_order_withdrawal.api.search_filter.admin.withdrawal_request" parent="api_platform.doctrine.orm.search_filter">
+            <argument type="collection">
+                <argument key="state">exact</argument>
+                <argument key="scope">exact</argument>
+                <argument key="email">ipartial</argument>
+                <argument key="orderNumber">ipartial</argument>
+                <argument key="lastName">ipartial</argument>
+            </argument>
+            <tag name="api_platform.filter" />
+        </service>
+
+        <service id="emagma_sylius_order_withdrawal.api.date_filter.admin.withdrawal_request" parent="api_platform.doctrine.orm.date_filter">
+            <argument type="collection">
+                <argument key="submittedAt">null</argument>
+            </argument>
+            <tag name="api_platform.filter" />
+        </service>
+
+        <service id="emagma_sylius_order_withdrawal.api.order_filter.admin.withdrawal_request" parent="api_platform.doctrine.orm.order_filter">
+            <argument type="collection">
+                <argument key="submittedAt">null</argument>
+                <argument key="id">null</argument>
+            </argument>
+            <tag name="api_platform.filter" />
+        </service>
+    </services>
+
+</container>

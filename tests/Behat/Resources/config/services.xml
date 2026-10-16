@@ -25,6 +25,10 @@
                  parent="sylius.behat.symfony_page" public="false" />
 
         <!-- Contexts -->
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Hook\RateLimiterContext" public="true">
+            <argument type="service" id="test.withdrawal_rate_limiter_pool" />
+        </service>
+
         <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\RequestingWithdrawalContext" public="true">
             <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Shop\RequestWithdrawalPage" />
             <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
@@ -48,6 +52,24 @@
             <argument type="service" id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Page\Admin\WithdrawalRequest\ShowPage" />
             <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
             <argument type="service" id="sylius.behat.email_checker" />
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Admin\ManagingWithdrawalRequestsContext" public="true">
+            <argument type="service" id="sylius.behat.api_platform_client.admin" />
+            <argument type="service" id="Sylius\Behat\Client\ResponseCheckerInterface" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.manager.withdrawal_request" />
+            <argument type="service" id="sylius.behat.email_checker" />
+            <argument type="service" id="sylius.behat.request_factory" />
+            <argument>%sylius.security.api_route%</argument>
+        </service>
+
+        <service id="Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Shop\SubmittingWithdrawalRequestContext" public="true">
+            <argument type="service" id="sylius.behat.api_platform_client.shop" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.repository.withdrawal_request" />
+            <argument type="service" id="sylius.behat.email_checker" />
+            <argument type="service" id="sylius.behat.shared_storage" />
+            <argument type="service" id="emagma_sylius_order_withdrawal.manager.withdrawal_request" />
         </service>
     </services>
 

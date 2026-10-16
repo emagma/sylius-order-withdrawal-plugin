@@ -6,6 +6,7 @@ default:
             paths:
                 - "%paths.base%/features/shop/requesting_order_withdrawal.feature"
             contexts:
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Hook\RateLimiterContext
                 - sylius.behat.context.hook.doctrine_orm
                 - sylius.behat.context.transform.shared_storage
                 - sylius.behat.context.setup.channel
@@ -60,3 +61,32 @@ default:
                 - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Admin\ManagingWithdrawalRequestsContext
             filters:
                 tags: "@managing_order_withdrawal_requests"
+
+        emagma_order_withdrawal_api_admin:
+            paths:
+                - "%paths.base%/features/api/admin/managing_withdrawal_requests.feature"
+                - "%paths.base%/features/api/admin/denying_access_to_withdrawal_requests_for_unauthorized_users.feature"
+            contexts:
+                - sylius.behat.context.hook.doctrine_orm
+                - sylius.behat.context.transform.shared_storage
+                - sylius.behat.context.setup.channel
+                - sylius.behat.context.setup.admin_api_security
+                - sylius.behat.context.hook.mailer
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Admin\ManagingWithdrawalRequestsContext
+            filters:
+                tags: "@managing_order_withdrawal_requests&&@api"
+
+        emagma_order_withdrawal_api_shop:
+            paths:
+                - "%paths.base%/features/api/shop/submitting_withdrawal_request.feature"
+            contexts:
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Hook\RateLimiterContext
+                - sylius.behat.context.hook.doctrine_orm
+                - sylius.behat.context.transform.shared_storage
+                - sylius.behat.context.setup.channel
+                - sylius.behat.context.hook.mailer
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext
+                - Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Shop\SubmittingWithdrawalRequestContext
+            filters:
+                tags: "@managing_order_withdrawal_requests&&@api"

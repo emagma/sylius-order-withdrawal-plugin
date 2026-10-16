@@ -40,6 +40,14 @@ final class WithdrawalRequestContext implements Context
         $this->createWithdrawalRequest($orderNumber, $name, $email, $state);
     }
 
+    #[Given('there are :count other withdrawal requests')]
+    public function thereAreOtherWithdrawalRequests(int $count): void
+    {
+        for ($i = 1; $i <= $count; ++$i) {
+            $this->createWithdrawalRequest(sprintf('9%08d', $i), 'Bulk Customer', sprintf('bulk%d@example.com', $i), 'new');
+        }
+    }
+
     private function createWithdrawalRequest(string $orderNumber, string $name, string $email, string $state): void
     {
         [$firstName, $lastName] = array_pad(explode(' ', $name, 2), 2, '');
@@ -51,6 +59,7 @@ final class WithdrawalRequestContext implements Context
         $request->setOrderNumber($orderNumber);
         $request->setOrderDate(new DateTimeImmutable('2026-06-01'));
         $request->setEmail($email);
+        $request->setLegalNoticeAccepted(true);
         $request->setState($this->normalizeState($state));
         $request->setSubmittedAt(new DateTimeImmutable());
 
