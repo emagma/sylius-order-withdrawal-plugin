@@ -1,6 +1,6 @@
 # Acceptance suites. Kept out of ci.yml because these need MySQL and a built test
 # application, so the fast checks stay independently re-runnable.
-# All four suites run browser-less through the `symfony` Mink session — no scenario is tagged
+# All six suites run browser-less through the `symfony` Mink session — no scenario is tagged
 # @javascript, so no headless Chrome and no served app are needed here.
 # One step per suite — a failing suite must not hide the verdict of the next.
 name: Behat
@@ -94,6 +94,14 @@ jobs:
       - name: Behat — processing
         if: '!cancelled()'
         run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_processing
+
+      - name: Behat — admin API
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_api_admin
+
+      - name: Behat — shop API
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_api_shop
 
       - name: Upload Behat debug output
         if: failure()
