@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Sylius\Behat\Client\ResponseCheckerInterface;
+use Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Admin\ManagingWithdrawalRequestsContext as ApiManagingWithdrawalRequestsContext;
+use Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Api\Shop\SubmittingWithdrawalRequestContext;
+use Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Hook\RateLimiterContext;
 use Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Setup\WithdrawalRequestContext;
 use Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Admin\ManagingWithdrawalRequestsContext;
 use Tests\Emagma\SyliusOrderWithdrawalPlugin\Behat\Context\Ui\Shop\AccessingWithdrawalFormContext;
@@ -55,6 +59,11 @@ return static function (ContainerConfigurator $container): void {
     ;
 
     // Contexts
+    $services->set(RateLimiterContext::class)
+        ->public()
+        ->args([service('test.withdrawal_rate_limiter_pool')])
+    ;
+
     $services->set(RequestingWithdrawalContext::class)
         ->public()
         ->args([
@@ -89,6 +98,28 @@ return static function (ContainerConfigurator $container): void {
             service(ShowPage::class),
             service('emagma_sylius_order_withdrawal.repository.withdrawal_request'),
             service('sylius.behat.email_checker'),
+        ])
+    ;
+
+    $services->set(ApiManagingWithdrawalRequestsContext::class)
+        ->public()
+        ->args([
+            service('sylius.behat.api_platform_client.admin'),
+            service(ResponseCheckerInterface::class),
+            service('emagma_sylius_order_withdrawal.repository.withdrawal_request'),
+            service('emagma_sylius_order_withdrawal.manager.withdrawal_request'),
+            service('sylius.behat.email_checker'),
+        ])
+    ;
+
+    $services->set(SubmittingWithdrawalRequestContext::class)
+        ->public()
+        ->args([
+            service('sylius.behat.api_platform_client.shop'),
+            service(ResponseCheckerInterface::class),
+            service('emagma_sylius_order_withdrawal.repository.withdrawal_request'),
+            service('sylius.behat.email_checker'),
+            service('sylius.behat.shared_storage'),
         ])
     ;
 };

@@ -8,6 +8,46 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 `main` covers the whole Sylius 2.x line; the `1.0.x-dev` branch (Sylius `^1.14.0`) is maintained
 separately — see [Branching](CONTRIBUTING.md#branching).
 
+## [Unreleased]
+
+### Added
+
+- An opt-in admin API under `/api/v2/admin/withdrawal-requests`: list with filters, show, create,
+  update, and the `start`, `confirm` and `reject` transitions. The show response carries
+  `availableTransitions`. There is no `DELETE` and no `PUT`.
+- An opt-in shop API: a public, throttled `POST /api/v2/shop/withdrawal-requests` answering
+  `202 Accepted` with an empty body.
+- The `api` configuration node, with `admin` and `shop` switches that are both off by default.
+  `api.shop` requires `rate_limiter_service`. See the
+  [developer guide](docs/developer-guide.md#api).
+- The extension points `WithdrawalRequestSubmissionHandlerInterface`,
+  `PendingConfirmationQueueInterface` and `WithdrawalRequestTransitionApplierInterface`. Their
+  implementations are `@internal`.
+- `WithdrawalRequestTransition`, a string-backed enum of the workflow transitions, with the graph
+  name as its `GRAPH` constant.
+- The plugin maps its workflow graph to the `symfony_workflow` adapter in
+  `sylius_state_machine_abstraction.graphs_to_adapters_mapping`; a mapping of your own still wins.
+
+### Changed
+
+- The side effects of a submission (acknowledgement email, notification, `WithdrawalRequestSubmitted`
+  event) and the confirmation email now go through `WithdrawalRequestSubmissionHandlerInterface`
+  and `PendingConfirmationQueueInterface`; `WithdrawalRequestListener` only delegates to them. An
+  application that redefined or altered the listener should read [UPGRADE.md](UPGRADE.md#21--22).
+- When the plugin wires `WithdrawalRequestListener`, its first eight constructor arguments no longer
+  drive side effects, so a compiler pass that changes them has no effect: decorate
+  `WithdrawalRequestSubmissionHandlerInterface` instead.
+
+### Deprecated
+
+- Building `WithdrawalRequestListener` without its two new trailing arguments, a
+  `WithdrawalRequestSubmissionHandlerInterface` and a `PendingConfirmationQueueInterface`. They
+  will be required in 3.0.
+
+### Fixed
+
+- A confirmation queued outside the admin controller could be sent on a later, unrelated confirm.
+
 ## [2.1.0] - 2026-10-14
 
 ### Added

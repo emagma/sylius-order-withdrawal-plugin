@@ -1,6 +1,6 @@
 # Acceptance suites. Kept out of ci.yml because these need MySQL and a built test
 # application, so the fast checks stay independently re-runnable.
-# All four suites run browser-less through the `symfony` Mink session — no scenario is tagged
+# All six suites run browser-less through the `symfony` Mink session — no scenario is tagged
 # @javascript, so no headless Chrome and no served app are needed here.
 # One step per suite — a failing suite must not hide the verdict of the next.
 name: Behat
@@ -93,6 +93,14 @@ jobs:
         if: '!cancelled()'
         run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_processing
 
+      - name: Behat — admin API
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_api_admin
+
+      - name: Behat — shop API
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_api_shop
+
       - name: Upload Behat debug output
         if: failure()
         uses: actions/upload-artifact@v7
@@ -100,3 +108,89 @@ jobs:
           name: behat-debug
           path: etc/build
           if-no-files-found: ignore
+
+  # No assets or Node: `yarn encore dev` exits 1 on Sylius 2.0, and the API suites render no Twig.
+  api-platform-floor:
+    name: Behat (API suites, API Platform 4.0 floor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "mysql://root@127.0.0.1:3306/sylius_test"
+      SYLIUS_TEST_APP_BUNDLES_PATH: tests/TestApplication/bundles.php
+      SYLIUS_TEST_APP_CONFIGS_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/config.yaml;@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/extended_entity.yaml"
+      SYLIUS_TEST_APP_ROUTES_TO_IMPORT: "@EmagmaSyliusOrderWithdrawalPlugin/tests/TestApplication/config/routes.yaml"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_MINIMUM }}
+          extensions: intl, gd, zip, bcmath, exif, pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - name: Select Sylius 2.0, Symfony 6.4 and API Platform 4.0
+        run: |
+          composer require sylius/sylius:"2.0.*" --no-update --no-interaction
+          composer config extra.symfony.require "6.4.*"
+          composer require --no-update --no-interaction \
+            api-platform/doctrine-common:"4.0.*" \
+            api-platform/doctrine-orm:"4.0.*" \
+            api-platform/documentation:"4.0.*" \
+            api-platform/http-cache:"4.0.*" \
+            api-platform/hydra:"4.0.*" \
+            api-platform/json-schema:"4.0.*" \
+            api-platform/jsonld:"4.0.*" \
+            api-platform/metadata:"4.0.*" \
+            api-platform/openapi:"4.0.*" \
+            api-platform/serializer:"4.0.*" \
+            api-platform/state:"4.0.*" \
+            api-platform/symfony:"4.0.*" \
+            api-platform/validator:"4.0.*"
+
+      - name: Install dependencies
+        run: composer update --no-interaction --no-progress --prefer-dist --no-scripts
+
+      - name: Check that every API Platform package resolved to 4.0
+        run: |
+          composer show 'api-platform/*'
+          # shellcheck disable=SC2016
+          composer show 'api-platform/*' --format=json | php -r '
+            $installed = json_decode(stream_get_contents(STDIN), true)["installed"] ?? [];
+            if ([] === $installed) { fwrite(STDERR, "No api-platform/* package installed.\n"); exit(1); }
+            $bad = array_filter($installed, static fn (array $p): bool => 1 !== preg_match("/^v?4\.0\./", $p["version"]));
+            foreach ($bad as $p) { fwrite(STDERR, sprintf("%s resolved to %s, expected 4.0.*\n", $p["name"], $p["version"])); }
+            exit([] === $bad ? 0 : 1);
+          '
+
+      - name: Prepare database
+        run: |
+          vendor/bin/console doctrine:database:create --if-not-exists --no-interaction
+          vendor/bin/console doctrine:schema:create --no-interaction
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit --colors=always
+
+      - name: Behat — admin API
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_api_admin
+
+      - name: Behat — shop API
+        if: '!cancelled()'
+        run: vendor/bin/behat --strict --no-interaction -f progress --suite=emagma_order_withdrawal_api_shop

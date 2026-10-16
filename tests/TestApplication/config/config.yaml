@@ -3,6 +3,18 @@ imports:
 
 emagma_sylius_order_withdrawal:
     notification_email: '%env(default::WITHDRAWAL_NOTIFICATION_EMAIL)%'
+    rate_limiter_service: limiter.withdrawal_request
+    api:
+        admin: true
+        shop: true
+
+framework:
+    rate_limiter:
+        withdrawal_request:
+            policy: fixed_window
+            limit: 20
+            interval: '1 minute'
+            lock_factory: null
 
 sylius_fixtures:
     suites:
@@ -69,3 +81,13 @@ when@test:
     framework:
         cache:
             prefix_seed: 'emagma_sylius_order_withdrawal_behat_test'
+            pools:
+                test.withdrawal_rate_limiter_pool:
+                    adapter: cache.adapter.filesystem
+        rate_limiter:
+            withdrawal_request:
+                policy: fixed_window
+                limit: 3
+                interval: '1 minute'
+                cache_pool: test.withdrawal_rate_limiter_pool
+                lock_factory: null

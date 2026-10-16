@@ -11,103 +11,84 @@ declare(strict_types=1);
 
 namespace Emagma\SyliusOrderWithdrawalPlugin\EventListener;
 
-use DateTimeImmutable;
+use Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueue;
+use Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueueInterface;
 use Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest;
-use Emagma\SyliusOrderWithdrawalPlugin\Event\WithdrawalRequestSubmitted;
 use Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailerInterface;
+use Emagma\SyliusOrderWithdrawalPlugin\Model\WithdrawalRequestTransition;
 use Emagma\SyliusOrderWithdrawalPlugin\Notifier\WithdrawalRequestNotifierAggregatorInterface;
+use Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandler;
+use Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandlerInterface;
 use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
 use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
-use Sylius\Component\Channel\Context\ChannelNotFoundException;
-use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Workflow\Event\CompletedEvent;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Throwable;
+use Symfony\Contracts\Service\ResetInterface;
+use function trigger_deprecation;
 
 #[AsEventListener(event: 'emagma_sylius_order_withdrawal.withdrawal_request.pre_create', method: 'onPreCreate')]
 #[AsEventListener(event: 'emagma_sylius_order_withdrawal.withdrawal_request.post_create', method: 'onPostCreate')]
-#[AsEventListener(event: 'workflow.emagma_sylius_order_withdrawal_request.completed', method: 'onTransitionCompleted')]
+#[AsEventListener(event: 'workflow.' . WithdrawalRequestTransition::GRAPH . '.completed', method: 'onTransitionCompleted')]
 #[AsEventListener(event: 'emagma_sylius_order_withdrawal.withdrawal_request.post_confirm', method: 'onPostConfirm')]
-final class WithdrawalRequestListener
+final readonly class WithdrawalRequestListener implements ResetInterface
 {
-    /** @var list<WithdrawalRequest> */
-    private array $pendingConfirmations = [];
+    private WithdrawalRequestSubmissionHandlerInterface $submissionHandler;
+
+    private PendingConfirmationQueueInterface $confirmationQueue;
 
     public function __construct(
-        private readonly WithdrawalRequestEmailerInterface $emailer,
-        private readonly WithdrawalRequestNotifierAggregatorInterface $notifier,
-        private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly ChannelContextInterface $channelContext,
-        private readonly LocaleContextInterface $localeContext,
-        private readonly bool $sendAcknowledgement = true,
-        private readonly ?LoggerInterface $logger = null,
-        private readonly ?ClockInterface $clock = null,
+        WithdrawalRequestEmailerInterface $emailer,
+        WithdrawalRequestNotifierAggregatorInterface $notifier,
+        EventDispatcherInterface $eventDispatcher,
+        ChannelContextInterface $channelContext,
+        LocaleContextInterface $localeContext,
+        bool $sendAcknowledgement = true,
+        ?LoggerInterface $logger = null,
+        private ?ClockInterface $clock = null,
+        ?WithdrawalRequestSubmissionHandlerInterface $submissionHandler = null,
+        ?PendingConfirmationQueueInterface $confirmationQueue = null,
     ) {
+        if (null === $submissionHandler || null === $confirmationQueue) {
+            trigger_deprecation(
+                'emagma/sylius-order-withdrawal-plugin',
+                '2.2',
+                'Not passing a "%s" and a "%s" to "%s" is deprecated; both will be required in 3.0. Without them, withdrawal requests confirmed through the API get no confirmation email.',
+                WithdrawalRequestSubmissionHandlerInterface::class,
+                PendingConfirmationQueueInterface::class,
+                self::class,
+            );
+        }
+
+        $this->submissionHandler = $submissionHandler ?? new WithdrawalRequestSubmissionHandler(
+            $emailer,
+            $notifier,
+            $eventDispatcher,
+            $channelContext,
+            $localeContext,
+            $sendAcknowledgement,
+            $logger,
+            $clock,
+        );
+        $this->confirmationQueue = $confirmationQueue ?? new PendingConfirmationQueue($emailer, $logger);
     }
 
     public function onPreCreate(ResourceControllerEvent $event): void
     {
         $request = $event->getSubject();
-        if (!$request instanceof WithdrawalRequest) {
-            return;
+        if ($request instanceof WithdrawalRequest) {
+            $this->submissionHandler->prepare($request);
         }
-
-        if (null === $request->getSubmittedAt()) {
-            $request->setSubmittedAt($this->clock?->now() ?? new DateTimeImmutable());
-        }
-
-        if (null === $request->getChannel()) {
-            $request->setChannel($this->resolveChannel());
-        }
-
-        if (null === $request->getLocaleCode()) {
-            $request->setLocaleCode($this->localeContext->getLocaleCode());
-        }
-    }
-
-    private function resolveChannel(): ?ChannelInterface
-    {
-        try {
-            $channel = $this->channelContext->getChannel();
-        } catch (ChannelNotFoundException) {
-            return null;
-        }
-
-        return $channel instanceof ChannelInterface ? $channel : null;
     }
 
     public function onPostCreate(ResourceControllerEvent $event): void
     {
         $request = $event->getSubject();
-        if (!$request instanceof WithdrawalRequest) {
-            return;
-        }
-
-        if ($this->sendAcknowledgement) {
-            $this->guard(fn () => $this->emailer->sendAcknowledgementEmail($request), 'acknowledgement email', $request);
-        }
-
-        $this->guard(fn () => $this->notifier->notify($request), 'notification', $request);
-        $this->guard(fn () => $this->eventDispatcher->dispatch(new WithdrawalRequestSubmitted($request)), 'submitted event', $request);
-    }
-
-    /**
-     * The resource is already flushed when post_create runs, so a failing side effect must be
-     * logged rather than turned into a 500 the customer would retry.
-     */
-    private function guard(callable $step, string $description, WithdrawalRequest $request): void
-    {
-        try {
-            $step();
-        } catch (Throwable $exception) {
-            $this->logger?->error(sprintf('Withdrawal request %s failed.', $description), [
-                'withdrawalRequest' => $request->getId(),
-                'exception' => $exception,
-            ]);
+        if ($request instanceof WithdrawalRequest) {
+            $this->submissionHandler->complete($request);
         }
     }
 
@@ -121,8 +102,8 @@ final class WithdrawalRequestListener
         $subject->touch($this->clock?->now());
 
         $transition = $event->getTransition();
-        if (null !== $transition && 'confirm' === $transition->getName()) {
-            $this->pendingConfirmations[] = $subject;
+        if (null !== $transition && WithdrawalRequestTransition::Confirm->value === $transition->getName()) {
+            $this->confirmationQueue->enqueue($subject);
         }
     }
 
@@ -133,11 +114,11 @@ final class WithdrawalRequestListener
      */
     public function onPostConfirm(ResourceControllerEvent $event): void
     {
-        $pending = $this->pendingConfirmations;
-        $this->pendingConfirmations = [];
+        $this->confirmationQueue->drain();
+    }
 
-        foreach ($pending as $request) {
-            $this->guard(fn () => $this->emailer->sendConfirmationEmail($request), 'confirmation email', $request);
-        }
+    public function reset(): void
+    {
+        $this->confirmationQueue->reset();
     }
 }

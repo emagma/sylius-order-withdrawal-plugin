@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+
+<serializer xmlns="http://symfony.com/schema/dic/serializer-mapping"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://symfony.com/schema/dic/serializer-mapping https://symfony.com/schema/dic/serializer-mapping/serializer-mapping-1.0.xsd"
+>
+    <class name="Emagma\SyliusOrderWithdrawalPlugin\Entity\WithdrawalRequest">
+        <attribute name="id">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+        </attribute>
+        <attribute name="firstName">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="lastName">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="email">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="orderNumber">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="orderDate">
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="notYetReceived">
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="receptionDate">
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="scope">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="message">
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:admin:withdrawal_request:update</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="legalNoticeAccepted">
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+            <group>emagma:shop:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="state">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+        </attribute>
+        <attribute name="channel">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="localeCode">
+            <group>emagma:admin:withdrawal_request:show</group>
+            <group>emagma:admin:withdrawal_request:create</group>
+        </attribute>
+        <attribute name="submittedAt">
+            <group>emagma:admin:withdrawal_request:index</group>
+            <group>emagma:admin:withdrawal_request:show</group>
+        </attribute>
+        <attribute name="updatedAt">
+            <group>emagma:admin:withdrawal_request:show</group>
+        </attribute>
+    </class>
+</serializer>

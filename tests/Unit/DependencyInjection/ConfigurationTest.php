@@ -13,6 +13,7 @@ namespace Tests\Emagma\SyliusOrderWithdrawalPlugin\Unit\DependencyInjection;
 
 use Emagma\SyliusOrderWithdrawalPlugin\DependencyInjection\Configuration;
 use Emagma\SyliusOrderWithdrawalPlugin\DependencyInjection\EmagmaSyliusOrderWithdrawalExtension;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -78,6 +79,39 @@ final class ConfigurationTest extends TestCase
         $this->expectExceptionMessageMatches('/not a valid email address/');
 
         $this->process(['notification_email' => 'not-an-email']);
+    }
+
+    public function testTheApiIsDisabledByDefault(): void
+    {
+        $config = (new Processor())->processConfiguration(new Configuration(), [['notification_email' => 'sav@example.com']]);
+
+        self::assertSame(['admin' => false, 'shop' => false], $config['api']);
+    }
+
+    /**
+     * @param array<string, bool> $api
+     * @param array{admin: bool, shop: bool} $expected
+     */
+    #[DataProvider('switches')]
+    public function testTheSwitchesAreIndependent(array $api, array $expected): void
+    {
+        $config = (new Processor())->processConfiguration(new Configuration(), [[
+            'notification_email' => 'sav@example.com',
+            'api' => $api,
+        ]]);
+
+        $actual = $config['api'];
+        ksort($actual);
+
+        self::assertSame($expected, $actual);
+    }
+
+    /** @return iterable<string, array{array<string, bool>, array{admin: bool, shop: bool}}> */
+    public static function switches(): iterable
+    {
+        yield 'admin only' => [['admin' => true], ['admin' => true, 'shop' => false]];
+        yield 'shop only' => [['shop' => true], ['admin' => false, 'shop' => true]];
+        yield 'both' => [['admin' => true, 'shop' => true], ['admin' => true, 'shop' => true]];
     }
 
     /**
