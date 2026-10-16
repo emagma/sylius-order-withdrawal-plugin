@@ -14,7 +14,7 @@
         <defaults autowire="true" autoconfigure="true" public="false" />
 
         <prototype namespace="Emagma\SyliusOrderWithdrawalPlugin\" resource="../src/*"
-                   exclude="../src/{DependencyInjection,Entity,Migrations,Model,Event,EmagmaSyliusOrderWithdrawalPlugin.php,EventListener/WithdrawalRequestRateLimitListener.php}" />
+                   exclude="../src/{Api,DependencyInjection,Entity,Migrations,Model,Event,EmagmaSyliusOrderWithdrawalPlugin.php,EventListener/WithdrawalRequestRateLimitListener.php}" />
 
         <service id="Emagma\SyliusOrderWithdrawalPlugin\Resolver\DefaultRecipientResolver">
             <argument>%emagma_sylius_order_withdrawal.notification_email%</argument>
@@ -46,6 +46,32 @@
             <tag name="form.type" />
         </service>
 
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandler">
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailerInterface" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Notifier\WithdrawalRequestNotifierAggregatorInterface" />
+            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="sylius.context.channel" />
+            <argument type="service" id="sylius.context.locale" />
+            <argument>%emagma_sylius_order_withdrawal.send_acknowledgement%</argument>
+            <argument type="service" id="logger" on-invalid="null" />
+            <argument type="service" id="clock" on-invalid="null" />
+        </service>
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandlerInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandler" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueue">
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailerInterface" />
+            <argument type="service" id="logger" on-invalid="null" />
+        </service>
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueueInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueue" />
+
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplier">
+            <argument type="service" id="sylius_abstraction.state_machine" />
+        </service>
+        <service id="Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplierInterface"
+                 alias="Emagma\SyliusOrderWithdrawalPlugin\StateMachine\WithdrawalRequestTransitionApplier" />
+
         <service id="Emagma\SyliusOrderWithdrawalPlugin\EventListener\WithdrawalRequestListener">
             <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Mailer\WithdrawalRequestEmailerInterface" />
             <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Notifier\WithdrawalRequestNotifierAggregatorInterface" />
@@ -55,6 +81,8 @@
             <argument>%emagma_sylius_order_withdrawal.send_acknowledgement%</argument>
             <argument type="service" id="logger" on-invalid="null" />
             <argument type="service" id="clock" on-invalid="null" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Submission\WithdrawalRequestSubmissionHandlerInterface" />
+            <argument type="service" id="Emagma\SyliusOrderWithdrawalPlugin\Confirmation\PendingConfirmationQueueInterface" />
         </service>
     </services>
 
